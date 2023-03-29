@@ -1,7 +1,7 @@
 Param(
-    [Parameter(Mandatory=$False)]$DfsDir = "C:\Users\zachk\Downloads", #G:\My Drive\Fantasy Football\DFS\2022\
-    [Parameter(Mandatory=$False)]$Week = "Test", #14
-    [Parameter(Mandatory=$False)]$MyUser = "ZachKleine"
+    [Parameter(Mandatory=$False)]$DfsDir = "",
+    [Parameter(Mandatory=$False)]$Week = "",
+    [Parameter(Mandatory=$False)]$MyUser = ""
 )
 Function Get-OpponentCsv {
     $OppCsv = "Week$Week"+"Results.csv"
