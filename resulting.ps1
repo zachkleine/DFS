@@ -1,23 +1,47 @@
 Param(
-    [Parameter(Mandatory=$False)]$DfsDir = "",
-    [Parameter(Mandatory=$False)]$Week = "",
-    [Parameter(Mandatory=$False)]$MyUser = ""
+    [CmdletBinding()]
+    [Parameter(Mandatory=$False)][String]$DfsDir = "", #G:\My Drive\Fantasy Football\DFS\2022\
+    [Parameter(Mandatory=$False)][int]$Week = ""
+    [Parameter(Mandatory=$False)][String]$MyUser = ""
 )
 Function Get-OpponentCsv {
-    $OppCsv = "Week$Week"+"Results.csv"
-    $ResultsDir = "$FullDir\Results\"
-    Set-Location -Path $ResultsDir
-    Get-ChildItem -Path $ResultsDir -Filter *.zip -Name | Expand-Archive -DestinationPath $ResultsDir
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true)][int]$Week,
+        [Parameter(Mandatory=$true)][string]$FullDir, 
+        [Parameter(Mandatory=$true)][string]$MyUser
+    )
+    $FileName = "Week$Week" + "_Results.csv"
+    $OppCsv = Join-Path -Path $FullDir -ChildPath $FileName
+    $ResultsDir = Join-Path -Path $FullDir -ChildPath "Results"
+    try {
+        Push-Location -Path $ResultsDir
+        Get-ChildItem -Path $ResultsDir -Filter *.zip -Name | Expand-Archive -DestinationPath $ResultsDir -ErrorAction SilentlyContinue
+    }
+    catch {
+        Write-Error "Error expanding zip file: $($_.Exception.Message)"
+        return
+    }
     $csvs = Get-ChildItem -Path $ResultsDir -Filter contest*.csv -Name
     foreach ($csv in $csvs) {    
-        Import-Csv -Path $csv | Select-Object -Property 'EntryName','Lineup','Points' `
-            | Where-Object {$_.EntryName -notmatch $MyUser} `
-            | Export-Csv $OppCsv -Append -NoTypeInformation
-        Remove-Item $csv
+        try {
+            Import-Csv -Path $csv | Select-Object -Property 'EntryName','Lineup','Points' `
+                | Where-Object {$_.EntryName -notmatch $MyUser} `
+                | Export-Csv $OppCsv -Append -NoTypeInformation
+            Remove-Item $csv -Force
+        }
+        catch {
+            Write-Error "Error importing CSV file '$csv': $($_.Exception.Message)"
+        }
     }
+    Pop-Location
     Return $OppCsv
 }
-Function Get-Lineups ($OpponentCsv) {
+Function Get-Lineups {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true)][String]$OpponentCsv
+    )
     $Positions = @("QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE", "FLEX", "DST")
     $csv = Import-Csv -Path $OpponentCsv | Select-Object *,"QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST" 
     $lineups = ($csv).Lineup
@@ -39,8 +63,12 @@ Function Get-Lineups ($OpponentCsv) {
             $csv[$i].$Position = $name
         }
     }
-    $csv | export-csv -Path $OpponentCsv -NoTypeInformation -Force
+    $csv | Export-Csv -Path $OpponentCsv -NoTypeInformation -Force
 }
-$FullDir = $DfsDir+"\Week$Week"
-$OpponentCsv = Get-OpponentCsv ($MyUser, $FullDir)
-Get-Lineups $OpponentCsv
+Function Get-Points () {
+    
+}
+
+$FullDir = Join-Path -Path $DfsDir -ChildPath "Week$Week"
+$OpponentCsv = Get-OpponentCsv -Week $Week -FullDir $FullDir -MyUser $MyUser
+Get-Lineups -OpponentCsv $OpponentCsv
