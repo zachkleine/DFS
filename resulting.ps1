@@ -1,8 +1,8 @@
 Param(
     [CmdletBinding()]
-    [Parameter(Mandatory=$False)][String]$DfsDir = "", #G:\My Drive\Fantasy Football\DFS\2022\
-    [Parameter(Mandatory=$False)][int]$Week = ""
-    [Parameter(Mandatory=$False)][String]$MyUser = ""
+    [Parameter(Mandatory=$False)][String]$DfsDir = "C:\Users\zachk\Downloads", #G:\My Drive\Fantasy Football\DFS\2022\
+    [Parameter(Mandatory=$False)][int]$Week = "13", #14
+    [Parameter(Mandatory=$False)][String]$MyUser = "ZachKleine"
 )
 Function Get-OpponentCsv {
     [CmdletBinding()]
