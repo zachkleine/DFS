@@ -44,9 +44,9 @@ Function Get-Lineups {
     )
     $Positions = @("QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE", "FLEX", "DST")
     $LineupCsv = Import-Csv -Path $OpponentCsv | Select-Object *,"QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST" 
-    $lineups = ($LineupCsv).Lineup
-    for ($i=0;$i -lt $lineups.Count;$i++) {
-        $Lineup = $lineups[$i].split(" ")
+    $FullLineup = ($LineupCsv).Lineup
+    for ($i=0;$i -lt $FullLineup.Count;$i++) {
+        $Lineup = $FullLineup[$i].split(" ")
         $Rb1Pos = $Lineup.IndexOf("RB")
         $Lineup[$Rb1Pos] = "RB1"
         $Rb2Pos = $Lineup.IndexOf("RB")
@@ -55,7 +55,7 @@ Function Get-Lineups {
         $Lineup[$Wr1Pos] = "WR1"
         $Wr2Pos = $Lineup.IndexOf("WR")
         $Lineup[$Wr2Pos] = "WR2"
-        $Wr3Pos = $Lineup.IndexOf("WR")
+        $Wr3Pos = $Lineup.IndexOf("WR") 
         $Lineup[$Wr3Pos] = "WR3"
         foreach ($Position in $Positions) {
             $pos = $Lineup.indexof($Position)
