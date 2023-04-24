@@ -43,27 +43,27 @@ Function Get-Lineups {
         [Parameter(Mandatory=$true)][String]$OpponentCsv
     )
     $Positions = @("QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE", "FLEX", "DST")
-    $csv = Import-Csv -Path $OpponentCsv | Select-Object *,"QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST" 
-    $lineups = ($csv).Lineup
+    $LineupCsv = Import-Csv -Path $OpponentCsv | Select-Object *,"QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST" 
+    $lineups = ($LineupCsv).Lineup
     for ($i=0;$i -lt $lineups.Count;$i++) {
-        $array = $lineups[$i].split(" ")
-        $Rb1Pos = $array.IndexOf("RB")
-        $array[$Rb1Pos] = "RB1"
-        $Rb2Pos = $array.IndexOf("RB")
-        $array[$Rb2Pos] = "RB2"
-        $Wr1Pos = $array.IndexOf("WR")
-        $array[$Wr1Pos] = "WR1"
-        $Wr2Pos = $array.IndexOf("WR")
-        $array[$Wr2Pos] = "WR2"
-        $Wr3Pos = $array.IndexOf("WR")
-        $array[$Wr3Pos] = "WR3"
+        $Lineup = $lineups[$i].split(" ")
+        $Rb1Pos = $Lineup.IndexOf("RB")
+        $Lineup[$Rb1Pos] = "RB1"
+        $Rb2Pos = $Lineup.IndexOf("RB")
+        $Lineup[$Rb2Pos] = "RB2"
+        $Wr1Pos = $Lineup.IndexOf("WR")
+        $Lineup[$Wr1Pos] = "WR1"
+        $Wr2Pos = $Lineup.IndexOf("WR")
+        $Lineup[$Wr2Pos] = "WR2"
+        $Wr3Pos = $Lineup.IndexOf("WR")
+        $Lineup[$Wr3Pos] = "WR3"
         foreach ($Position in $Positions) {
-            $pos = $array.indexof($Position)
-            $name = $array[$pos+1] + " " + $array[$pos+2]
-            $csv[$i].$Position = $name
+            $pos = $Lineup.indexof($Position)
+            $name = $Lineup[$pos+1] + " " + $Lineup[$pos+2]
+            $LineupCsv[$i].$Position = $name
         }
     }
-    $csv | Export-Csv -Path $OpponentCsv -NoTypeInformation -Force
+    $LineupCsv | Export-Csv -Path $OpponentCsv -NoTypeInformation -Force
 }
 Function Get-Points () {
     
