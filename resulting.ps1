@@ -47,16 +47,20 @@ Function Get-Lineups {
     $FullLineup = ($LineupCsv).Lineup
     for ($i=0;$i -lt $FullLineup.Count;$i++) {
         $Lineup = $FullLineup[$i].split(" ")
-        $Rb1Pos = $Lineup.IndexOf("RB")
-        $Lineup[$Rb1Pos] = "RB1"
-        $Rb2Pos = $Lineup.IndexOf("RB")
-        $Lineup[$Rb2Pos] = "RB2"
-        $Wr1Pos = $Lineup.IndexOf("WR")
-        $Lineup[$Wr1Pos] = "WR1"
-        $Wr2Pos = $Lineup.IndexOf("WR")
-        $Lineup[$Wr2Pos] = "WR2"
-        $Wr3Pos = $Lineup.IndexOf("WR") 
-        $Lineup[$Wr3Pos] = "WR3"
+        $RbCount = 0
+        $WrCount = 0
+        foreach ($pos in 0..($Lineup.Length - 1)) {
+            switch ($Lineup[$pos]) {
+                "RB" {
+                    $RbCount++
+                    $Lineup[$pos] = "RB$RbCount"
+                }
+                "WR" {
+                    $WrCount++
+                    $Lineup[$pos] = "WR$WrCount"
+                }
+            }
+        }
         foreach ($Position in $Positions) {
             $pos = $Lineup.indexof($Position)
             $name = $Lineup[$pos+1] + " " + $Lineup[$pos+2]
