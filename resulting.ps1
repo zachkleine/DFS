@@ -68,11 +68,13 @@ Function Get-Lineups {
         }
     }
     $LineupCsv | Export-Csv -Path $OpponentCsv -NoTypeInformation -Force
+
 }
 Function Get-Points () {
-    
+    C:\Users\zachk\Downloads\Week13\Week13_Results.csv   
 }
 
 $FullDir = Join-Path -Path $DfsDir -ChildPath "Week$Week"
 $OpponentCsv = Get-OpponentCsv -Week $Week -FullDir $FullDir -MyUser $MyUser
-Get-Lineups -OpponentCsv $OpponentCsv
+$LineupCsv = Get-Lineups -OpponentCsv $OpponentCsv
+Write-Host $LineupCsv
