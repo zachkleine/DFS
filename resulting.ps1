@@ -43,12 +43,16 @@ Function Get-Lineups {
         [Parameter(Mandatory=$true)][String]$OpponentCsv
     )
     $Positions = @("QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE", "FLEX", "DST")
-    $LineupCsv = Import-Csv -Path $OpponentCsv | Select-Object *,"QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST" 
+    $LineupCsv = Import-Csv -Path $OpponentCsv | Select-Object *,"QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST","Projection","Ownership","Ceiling"
+    $ProjCsv = Import-Csv -Path C:\Users\zachk\Downloads\Week13\ETRProj.csv | Select-Object "Name","DK Projection","DK Ownership","DK Ceiling"
     $FullLineup = ($LineupCsv).Lineup
     for ($i=0;$i -lt $FullLineup.Count;$i++) {
         $Lineup = $FullLineup[$i].split(" ")
         $RbCount = 0
         $WrCount = 0
+        $ProjectionTotal = 0
+        $OwnershipTotal = 0
+        $CeilingTotal = 0
         foreach ($pos in 0..($Lineup.Length - 1)) {
             switch ($Lineup[$pos]) {
                 "RB" {
@@ -65,16 +69,26 @@ Function Get-Lineups {
             $pos = $Lineup.indexof($Position)
             $name = $Lineup[$pos+1] + " " + $Lineup[$pos+2]
             $LineupCsv[$i].$Position = $name
+            $ProjLookup = $ProjCsv `
+                | Where-Object {$_.Name -eq $name} `
+                | Select-Object -ExpandProperty "DK Projection"
+            $ProjectionTotal += $ProjLookup
+            $OwnLookup = $ProjCsv `
+                | Where-Object {$_.Name -eq $name} `
+                | Select-Object -ExpandProperty "DK Ownership"
+            $OwnershipTotal += $OwnLookup
+            $CeilingLookup = $ProjCsv `
+            | Where-Object {$_.Name -eq $name} `
+            | Select-Object -ExpandProperty "DK Ceiling"
+        $CeilingTotal += $CeilingLookup
         }
+        $LineupCsv[$i].'Projection' = $ProjectionTotal
+        $LineupCsv[$i].'Ownership' = $OwnershipTotal
+        $LineupCsv[$i].'Ceiling' = $CeilingTotal
     }
     $LineupCsv | Export-Csv -Path $OpponentCsv -NoTypeInformation -Force
-
-}
-Function Get-Points () {
-    C:\Users\zachk\Downloads\Week13\Week13_Results.csv   
 }
 
 $FullDir = Join-Path -Path $DfsDir -ChildPath "Week$Week"
 $OpponentCsv = Get-OpponentCsv -Week $Week -FullDir $FullDir -MyUser $MyUser
 $LineupCsv = Get-Lineups -OpponentCsv $OpponentCsv
-Write-Host $LineupCsv
