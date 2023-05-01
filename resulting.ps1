@@ -37,6 +37,27 @@ Function Get-OpponentCsv {
     Pop-Location
     Return $OppCsv
 }
+Function Get-RBWR {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true)]$Lineup
+    )
+    $RbCount = 0
+    $WrCount = 0
+    foreach ($pos in 0..($Lineup.Length - 1)) {
+        switch ($Lineup[$pos]) {
+            "RB" {
+                $RbCount++
+                $Lineup[$pos] = "RB$RbCount"
+            }
+            "WR" {
+                $WrCount++
+                $Lineup[$pos] = "WR$WrCount"
+            }
+        }
+    }
+    Return $Lineup
+}
 Function Get-Lineups {
     [CmdletBinding()]
     param(
@@ -48,23 +69,10 @@ Function Get-Lineups {
     $FullLineup = ($LineupCsv).Lineup
     for ($i=0;$i -lt $FullLineup.Count;$i++) {
         $Lineup = $FullLineup[$i].split(" ")
-        $RbCount = 0
-        $WrCount = 0
+        Get-RBWR -Lineup $Lineup
         $ProjectionTotal = 0
         $OwnershipTotal = 0
         $CeilingTotal = 0
-        foreach ($pos in 0..($Lineup.Length - 1)) {
-            switch ($Lineup[$pos]) {
-                "RB" {
-                    $RbCount++
-                    $Lineup[$pos] = "RB$RbCount"
-                }
-                "WR" {
-                    $WrCount++
-                    $Lineup[$pos] = "WR$WrCount"
-                }
-            }
-        }
         foreach ($Position in $Positions) {
             $pos = $Lineup.indexof($Position)
             $name = $Lineup[$pos+1] + " " + $Lineup[$pos+2]
