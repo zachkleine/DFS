@@ -94,9 +94,8 @@ Function Get-Lineups {
         $LineupCsv[$i].'Ownership' = $OwnershipTotal
         $LineupCsv[$i].'Ceiling' = $CeilingTotal
     }
-    $LineupCsv | Export-Csv -Path $OpponentCsv -NoTypeInformation -Force
+    $LineupCsv | Select-Object "EntryName","QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST","Points","Projection","Ownership","Ceiling" | Export-Csv -Path $OpponentCsv -NoTypeInformation -Force
 }
-
 $FullDir = Join-Path -Path $DfsDir -ChildPath "Week$Week"
 $OpponentCsv = Get-OpponentCsv -Week $Week -FullDir $FullDir -MyUser $MyUser
 $LineupCsv = Get-Lineups -OpponentCsv $OpponentCsv
