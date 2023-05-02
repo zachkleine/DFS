@@ -67,9 +67,10 @@ Function Get-Lineups {
     $Positions = @("QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE", "FLEX", "DST")
     $LineupCsv = Import-Csv -Path $OpponentCsv | Select-Object *,"QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST","Projection","Ownership","Ceiling"
     $ProjCsv = $ProjCsv | Select-Object "Name","DK Projection","DK Ownership","DK Ceiling"
-    $FullLineup = ($LineupCsv).Lineup
-    for ($i=0;$i -lt $FullLineup.Count;$i++) {
-        $Lineup = $FullLineup[$i].split(" ")
+    $FullLineups = ($LineupCsv).Lineup
+    foreach ($FullLineup in $FullLineups) {
+        $index = $FullLineups.indexof($FullLineup)
+        $Lineup = $FullLineup.split(" ")
         Get-RBWR -Lineup $Lineup
         $ProjectionTotal = 0
         $OwnershipTotal = 0
@@ -77,23 +78,26 @@ Function Get-Lineups {
         foreach ($Position in $Positions) {
             $pos = $Lineup.indexof($Position)
             $name = $Lineup[$pos+1] + " " + $Lineup[$pos+2]
-            $LineupCsv[$i].$Position = $name
+            $LineupCsv[$index].$Position = $name
+
             $ProjLookup = $ProjCsv `
                 | Where-Object {$_.Name -eq $name} `
                 | Select-Object -ExpandProperty "DK Projection"
             $ProjectionTotal += $ProjLookup
+            
             $OwnLookup = $ProjCsv `
                 | Where-Object {$_.Name -eq $name} `
                 | Select-Object -ExpandProperty "DK Ownership"
             $OwnershipTotal += $OwnLookup
+            
             $CeilingLookup = $ProjCsv `
-            | Where-Object {$_.Name -eq $name} `
-            | Select-Object -ExpandProperty "DK Ceiling"
-        $CeilingTotal += $CeilingLookup
+                | Where-Object {$_.Name -eq $name} `
+                | Select-Object -ExpandProperty "DK Ceiling"
+            $CeilingTotal += $CeilingLookup
         }
-        $LineupCsv[$i].'Projection' = $ProjectionTotal
-        $LineupCsv[$i].'Ownership' = $OwnershipTotal
-        $LineupCsv[$i].'Ceiling' = $CeilingTotal
+        $LineupCsv[$index].'Projection' = $ProjectionTotal
+        $LineupCsv[$index].'Ownership' = $OwnershipTotal
+        $LineupCsv[$index].'Ceiling' = $CeilingTotal
     }
     $LineupCsv `
     | Select-Object "EntryName","QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST","Points","Projection","Ownership","Ceiling" `
