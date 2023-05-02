@@ -1,7 +1,7 @@
 Param(
     [CmdletBinding()]
-    [Parameter(Mandatory=$False)][String]$DfsDir = "C:\Users\zachk\Downloads", #G:\My Drive\Fantasy Football\DFS\2022\
-    [Parameter(Mandatory=$False)][int]$Week = "13", #14
+    [Parameter(Mandatory=$False)][String]$DfsDir = "G:\My Drive\Fantasy Football\DFS\2022",
+    [Parameter(Mandatory=$False)][int]$Week = "13",
     [Parameter(Mandatory=$False)][String]$MyUser = "ZachKleine"
 )
 Function Get-OpponentCsv {
@@ -61,11 +61,12 @@ Function Get-RBWR {
 Function Get-Lineups {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true)][String]$OpponentCsv
+        [Parameter(Mandatory=$true)][String]$OpponentCsv,
+        [Parameter(Mandatory=$true)]$ProjCsv
     )
     $Positions = @("QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE", "FLEX", "DST")
     $LineupCsv = Import-Csv -Path $OpponentCsv | Select-Object *,"QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST","Projection","Ownership","Ceiling"
-    $ProjCsv = Import-Csv -Path C:\Users\zachk\Downloads\Week13\ETRProj.csv | Select-Object "Name","DK Projection","DK Ownership","DK Ceiling"
+    $ProjCsv = $ProjCsv | Select-Object "Name","DK Projection","DK Ownership","DK Ceiling"
     $FullLineup = ($LineupCsv).Lineup
     for ($i=0;$i -lt $FullLineup.Count;$i++) {
         $Lineup = $FullLineup[$i].split(" ")
@@ -99,5 +100,6 @@ Function Get-Lineups {
     | Export-Csv -Path $OpponentCsv -NoTypeInformation -Force
 }
 $FullDir = Join-Path -Path $DfsDir -ChildPath "Week$Week"
+$ProjCsv = Import-Csv -Path $FullDir"\ETRProj.csv"
 $OpponentCsv = Get-OpponentCsv -Week $Week -FullDir $FullDir -MyUser $MyUser
-$LineupCsv = Get-Lineups -OpponentCsv $OpponentCsv
+$LineupCsv = Get-Lineups -OpponentCsv $OpponentCsv -ProjCsv $ProjCsv
