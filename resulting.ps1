@@ -90,8 +90,8 @@ Function Get-Lineups {
         $LineupCsv[$i].'Ceiling' = $CeilingTotal
     }
     $LineupCsv `
-    | Select-Object "EntryName","QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST","Points","Projection","Ownership","Ceiling" `
-    | Export-Csv -Path $OpponentCsv -NoTypeInformation -Force
+        | Select-Object "EntryName","QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST","Points","Projection","Ownership","Ceiling" `
+        | Export-Csv -Path $OpponentCsv -NoTypeInformation -Force
 }
 $FullDir = Join-Path -Path $DfsDir -ChildPath "Week$Week"
 $ProjCsv = Import-Csv -Path $FullDir"\ETRProj.csv"
