@@ -78,18 +78,12 @@ Function Get-Lineups {
             $pos = $Lineup.indexof($Position)
             $name = $Lineup[$pos+1] + " " + $Lineup[$pos+2]
             $LineupCsv[$i].$Position = $name
-            $ProjLookup = $ProjCsv `
+            $Lookup = $ProjCsv `
                 | Where-Object {$_.Name -eq $name} `
-                | Select-Object -ExpandProperty "DK Projection"
-            $ProjectionTotal += $ProjLookup
-            $OwnLookup = $ProjCsv `
-                | Where-Object {$_.Name -eq $name} `
-                | Select-Object -ExpandProperty "DK Ownership"
-            $OwnershipTotal += $OwnLookup
-            $CeilingLookup = $ProjCsv `
-            | Where-Object {$_.Name -eq $name} `
-            | Select-Object -ExpandProperty "DK Ceiling"
-        $CeilingTotal += $CeilingLookup
+                | Select-Object -Property "DK Projection","DK Ownership","DK Ceiling"
+            $ProjectionTotal += $Lookup."DK Projection"
+            $OwnershipTotal += $Lookup."DK Ownership"
+            $CeilingTotal += $Lookup."DK Ceiling"
         }
         $LineupCsv[$i].'Projection' = $ProjectionTotal
         $LineupCsv[$i].'Ownership' = $OwnershipTotal
