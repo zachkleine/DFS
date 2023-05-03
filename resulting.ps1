@@ -37,40 +37,40 @@ Function Get-OpponentCsv {
     Pop-Location
     Return $OppCsv
 }
-Function Get-RBWR {
+Function Get-FormattedLineup {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true)]$Lineup
+        [Parameter(Mandatory=$true)]$LineupArray
     )
     $RbCount = 0
     $WrCount = 0
-    foreach ($pos in 0..($Lineup.Length - 1)) {
+    foreach ($pos in 0..($LineupArray.Length - 1)) {
         switch ($Lineup[$pos]) {
             "RB" {
                 $RbCount++
-                $Lineup[$pos] = "RB$RbCount"
+                $LineupArray[$pos] = "RB$RbCount"
             }
             "WR" {
                 $WrCount++
-                $Lineup[$pos] = "WR$WrCount"
+                $LineupArray[$pos] = "WR$WrCount"
             }
         }
     }
-    Return $Lineup
+    Return $LineupArray
 }
 Function Get-Lineups {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)][String]$OpponentCsv,
-        [Parameter(Mandatory=$true)]$ProjCsv
+        [Parameter(Mandatory=$true)][String]$Projections
     )
     $Positions = @("QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE", "FLEX", "DST")
     $LineupCsv = Import-Csv -Path $OpponentCsv | Select-Object *,"QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST","Projection","Ownership","Ceiling"
-    $ProjCsv = $ProjCsv | Select-Object "Name","DK Projection","DK Ownership","DK Ceiling"
+    $ProjCsv = Import-Csv -Path $Projections | Select-Object "Name","DK Projection","DK Ownership","DK Ceiling"
     $FullLineup = ($LineupCsv).Lineup
     for ($i=0;$i -lt $FullLineup.Count;$i++) {
         $Lineup = $FullLineup[$i].split(" ")
-        Get-RBWR -Lineup $Lineup
+        Get-FormattedLineup -LineupArray $Lineup
         $ProjectionTotal = 0
         $OwnershipTotal = 0
         $CeilingTotal = 0
@@ -94,6 +94,6 @@ Function Get-Lineups {
         | Export-Csv -Path $OpponentCsv -NoTypeInformation -Force
 }
 $FullDir = Join-Path -Path $DfsDir -ChildPath "Week$Week"
-$ProjCsv = Import-Csv -Path $FullDir"\ETRProj.csv"
+$Projections = $FullDir+"\ETRProj.csv"
 $OpponentCsv = Get-OpponentCsv -Week $Week -FullDir $FullDir -MyUser $MyUser
-$LineupCsv = Get-Lineups -OpponentCsv $OpponentCsv -ProjCsv $ProjCsv
+$LineupCsv = Get-Lineups -OpponentCsv $OpponentCsv -Projections $Projections
