@@ -58,6 +58,18 @@ Function Get-FormattedLineup {
     }
     Return $LineupArray
 }
+Function Get-ValidName {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true)][string]$Name
+    )
+    if ($ETRProj -notcontains $Name) {
+        return $true
+    }
+    else {
+        return $false
+    }
+}
 Function Get-Lineups {
     [CmdletBinding()]
     param(
@@ -76,14 +88,20 @@ Function Get-Lineups {
         $CeilingTotal = 0
         foreach ($Position in $Positions) {
             $pos = $Lineup.indexof($Position)
-            $name = $Lineup[$pos+1] + " " + $Lineup[$pos+2]
-            $LineupCsv[$i].$Position = $name
-            $Lookup = $ProjCsv `
-                | Where-Object {$_.Name -eq $name} `
-                | Select-Object -Property "DK Projection","DK Ownership","DK Ceiling"
-            $ProjectionTotal += $Lookup."DK Projection"
-            $OwnershipTotal += $Lookup."DK Ownership"
-            $CeilingTotal += $Lookup."DK Ceiling"
+            $Name = $Lineup[$pos+1] + " " + $Lineup[$pos+2]
+            $ValidName = Get-ValidName -Name $Name
+            if ($ValidName) {    
+                $LineupCsv[$i].$Position = $Name
+                $Lookup = $ProjCsv `
+                    | Where-Object {$_.Name -eq $Name} `
+                    | Select-Object -Property "DK Projection","DK Ownership","DK Ceiling"
+                $ProjectionTotal += $Lookup."DK Projection"
+                $OwnershipTotal += $Lookup."DK Ownership"
+                $CeilingTotal += $Lookup."DK Ceiling"
+            }
+            else {
+                Out-File -FilePath "G:\My Drive\Fantasy Football\DFS\2022\Week13\missingplayers.txt" -Append -InputObject $Name
+            }
         }
         $LineupCsv[$i].'Projection' = $ProjectionTotal
         $LineupCsv[$i].'Ownership' = $OwnershipTotal
