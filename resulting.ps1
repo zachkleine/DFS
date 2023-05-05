@@ -58,60 +58,91 @@ Function Get-FormattedLineup {
     }
     Return $LineupArray
 }
-Function Get-ValidName {
+Function Get-ValidNames {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true)][string]$Name
+        [Parameter(Mandatory=$true)][String[]]$Positions,
+        [Parameter(Mandatory=$true)]$NameList,
+        [Parameter(Mandatory=$true)]$Names
     )
-    if ($ETRProj -notcontains $Name) {
-        return $true
+    foreach ($Position in $Positions) {
+        $list += ($Names | Select-Object -Property $Position | Where-Object {$_.$Position -ne " "}).$Position | Sort-Object | Get-Unique
     }
-    else {
-        return $false
+    $ResultsList = $list | Sort-Object | Get-Unique
+    foreach ($Result in $ResultsList) {
+        if ($NameList -notcontains $Result) {
+            $MissingList += $Result +" "
+        }
     }
+    Return $MissingList
 }
 Function Get-Lineups {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)][String]$OpponentCsv,
-        [Parameter(Mandatory=$true)][String]$Projections
+        [Parameter(Mandatory=$true)][String[]]$Positions
     )
-    $Positions = @("QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE", "FLEX", "DST")
     $LineupCsv = Import-Csv -Path $OpponentCsv | Select-Object *,"QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST","Projection","Ownership","Ceiling"
-    $ProjCsv = Import-Csv -Path $Projections | Select-Object "Name","DK Projection","DK Ownership","DK Ceiling"
     $FullLineup = ($LineupCsv).Lineup
     for ($i=0;$i -lt $FullLineup.Count;$i++) {
         $Lineup = $FullLineup[$i].split(" ")
         Get-FormattedLineup -LineupArray $Lineup
-        $ProjectionTotal = 0
-        $OwnershipTotal = 0
-        $CeilingTotal = 0
         foreach ($Position in $Positions) {
             $pos = $Lineup.indexof($Position)
             $Name = $Lineup[$pos+1] + " " + $Lineup[$pos+2]
-            $ValidName = Get-ValidName -Name $Name
-            if ($ValidName) {    
-                $LineupCsv[$i].$Position = $Name
-                $Lookup = $ProjCsv `
-                    | Where-Object {$_.Name -eq $Name} `
-                    | Select-Object -Property "DK Projection","DK Ownership","DK Ceiling"
-                $ProjectionTotal += $Lookup."DK Projection"
-                $OwnershipTotal += $Lookup."DK Ownership"
-                $CeilingTotal += $Lookup."DK Ceiling"
-            }
-            else {
-                Out-File -FilePath "G:\My Drive\Fantasy Football\DFS\2022\Week13\missingplayers.txt" -Append -InputObject $Name
-            }
+            $LineupCsv[$i].$Position = $Name
         }
-        $LineupCsv[$i].'Projection' = $ProjectionTotal
-        $LineupCsv[$i].'Ownership' = $OwnershipTotal
-        $LineupCsv[$i].'Ceiling' = $CeilingTotal
     }
+    return $LineupCsv
+}
+Function Get-Totals {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true)][String]$LineupCsv,
+        [Parameter(Mandatory=$true)][String[]]$Positions
+    )
+}
+$Positions = @("QB", "RB1", "RB2", "WR1", "WR2", "WR3", "TE", "FLEX", "DST")
+$FullDir = Join-Path -Path $DfsDir -ChildPath "Week$Week"
+$Projections = $FullDir+"\ETRProj.csv"
+$OpponentCsv = Get-OpponentCsv -Week $Week -FullDir $FullDir -MyUser $MyUser
+$LineupCsv = Get-Lineups -OpponentCsv $OpponentCsv -Positions $Positions
+$MissingNames = Get-ValidNames -Positions $Positions -NameList (Import-csv -path $Projections | Select-Object -Property Name).Name -Names ($LineupCsv | Select-Object -Property "QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST")
+if (!$MissingNames){
     $LineupCsv `
         | Select-Object "EntryName","QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST","Points","Projection","Ownership","Ceiling" `
         | Export-Csv -Path $OpponentCsv -NoTypeInformation -Force
 }
-$FullDir = Join-Path -Path $DfsDir -ChildPath "Week$Week"
-$Projections = $FullDir+"\ETRProj.csv"
-$OpponentCsv = Get-OpponentCsv -Week $Week -FullDir $FullDir -MyUser $MyUser
-$LineupCsv = Get-Lineups -OpponentCsv $OpponentCsv -Projections $Projections
+else {
+    Remove-Item $OpponentCsv
+    Out-File -FilePath $FullDir"\missingplayers.txt" -InputObject $MissingNames
+}
+
+#$ProjCsv = Import-Csv -Path $Projections | Select-Object "Name","DK Projection","DK Ownership","DK Ceiling"
+<#    if (!$MissingPlayers) {
+    }
+    else {
+        
+        $Output = $MissingPlayers | Sort-Object | Get-Unique
+
+    }#>
+
+            #$ProjectionTotal = 0
+        #$OwnershipTotal = 0
+        #$CeilingTotal = 0
+            #$ValidName = Get-ValidName -Name $Name -NameList $ProjCsv.Name
+            #if ($ValidName) {    
+            #    $LineupCsv[$i].$Position = $Name
+            #    $Lookup = $ProjCsv `
+            #        | Where-Object {$_.Name -eq $Name} `
+            #        | Select-Object -Property "DK Projection","DK Ownership","DK Ceiling"
+            #    $ProjectionTotal += $Lookup."DK Projection"
+            #    $OwnershipTotal += $Lookup."DK Ownership"
+            #    $CeilingTotal += $Lookup."DK Ceiling"
+            #}
+            #else {
+            #    $MissingPlayers += $Name+" "
+            #}
+        #$LineupCsv[$i].'Projection' = $ProjectionTotal
+        #$LineupCsv[$i].'Ownership' = $OwnershipTotal
+        #$LineupCsv[$i].'Ceiling' = $CeilingTotal
