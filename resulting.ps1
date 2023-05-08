@@ -67,7 +67,6 @@ Function Get-ValidNames {
     )
     foreach ($Position in $Positions) {
         $list += ($Names | Select-Object -Property $Position | Where-Object {$_.$Position -ne " "}).$Position
-
     }
     $ResultsList = $list | Sort-Object | Get-Unique
     foreach ($Result in $ResultsList) {
@@ -108,8 +107,8 @@ Function Get-Lineups {
         $LineupCsv[$i].'Ownership' = $OwnershipTotal
         $LineupCsv[$i].'Ceiling' = $CeilingTotal
     }
-    $MissingPlayers = Get-ValidNames -Names ($LineupCsv | Select-Object -Property "QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST") -Projections ($ProjCsv).    $MissingPlayers = Get-ValidNames -Names ($LineupCsv | Select-Object -Property "QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST") -Projections ($ProjCsv).Name -Positions $Positions
-    If ($MissingPlayers) {
+    $MissingPlayers = Get-ValidNames -Names ($LineupCsv | Select-Object -Property "QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST") -Projections ($ProjCsv).Name -Positions $Positions
+    If (!$MissingPlayers) {
         $LineupCsv `
             | Select-Object "EntryName","QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST","Points","Projection","Ownership","Ceiling" `
             | Export-Csv -Path $OpponentCsv -NoTypeInformation -Force
