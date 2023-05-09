@@ -122,7 +122,7 @@ Function Get-Lineups {
             }
             $LineupCsv[$i].$Position = $NameFinal
             $Lookup = $ProjCsv `
-                | Where-Object {$_.Name -eq $Name} `
+                | Where-Object {$_.Name -eq $NameFinal} `
                 | Select-Object -Property "DK Projection","DK Ownership","DK Ceiling"
             $ProjectionTotal += $Lookup."DK Projection"
             $OwnershipTotal += $Lookup."DK Ownership"
