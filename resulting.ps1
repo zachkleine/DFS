@@ -75,10 +75,10 @@ Function Get-Lineups {
                 $ProjectionTotal += $Lookup."DK Projection"
                 $OwnershipTotal += $Lookup."DK Ownership"
                 $CeilingTotal += $Lookup."DK Ceiling"
-                write-host $OwnershipTotal.Count
             }
             $Lineup.'Projection' = ($ProjectionTotal | Measure-Object -Sum).Sum
-            if ($OwnershipTotal.Count -ge 1) {
+            #write-host $OwnershipTotal
+            if ($OwnershipTotal -gt 0) {
                 $Lineup.'Ownership' = Get-ProductOwnership -OwnershipTotal $OwnershipTotal
             }
             else {
