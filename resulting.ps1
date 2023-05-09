@@ -54,16 +54,15 @@ Function Get-Lineups {
         $Roster = Get-Roster -positions $Positions -rosterString $FormattedLineup
         foreach ($Position in $Positions) {
             $Name = $($Roster[$Position]).Trim($Position)
-            $NameFinal = $Name.Trim(" ")
+            $Name = $Name.Trim(" ")
             if ($Position -eq "DST") {
-                $NameFinal = $NameFinal+" "
+                $Name = $Name+" "
             }
-            $LineupCsv[$i].$Position = $NameFinal
+            $LineupCsv[$i].$Position = $Name
         }
     }
     $MissingPlayers = Get-ValidateNames -Names ($LineupCsv | Select-Object -Property "QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST") -Projections ($ProjCsv).Name -Positions $Positions
     If (!$MissingPlayers) {
-        #if valid do the calculations and output csv
         foreach ($Lineup in $LineupCsv) {
             $ProjectionTotal = @()
             $OwnershipTotal = @()
