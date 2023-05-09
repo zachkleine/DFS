@@ -40,7 +40,7 @@ Function Get-OpponentCsv {
 Function Get-FormattedLineup {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true)]$LineupArray
+        [Parameter(Mandatory=$true)][System.Object]$LineupArray
     )
     $RbCount = 0
     $WrCount = 0
@@ -61,11 +61,12 @@ Function Get-FormattedLineup {
 Function Get-ValidNames {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true)]$Names,
-        [Parameter(Mandatory=$true)]$Projections,
+        [Parameter(Mandatory=$true)][string[]]$Names,
+        [Parameter(Mandatory=$true)][string[]]$Projections,
         [Parameter(Mandatory=$true)][String[]]$Positions
     )
     foreach ($Position in $Positions) {
+        write-host $Names | Select-Object -Property $Position | Where-Object {$_.$Position -ne " "}
         $list += ($Names | Select-Object -Property $Position | Where-Object {$_.$Position -ne " "}).$Position
     }
     $ResultsList = $list | Sort-Object | Get-Unique
@@ -76,7 +77,6 @@ Function Get-ValidNames {
     }
     return $MissingPlayers
 }
-
 Function Get-Roster {
     param (
         [string]$rosterString,
@@ -101,7 +101,8 @@ Function Get-Lineups {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)][String]$OpponentCsv,
-        [Parameter(Mandatory=$true)][String]$Projections
+        [Parameter(Mandatory=$true)][String]$Projections,
+        [Parameter(Mandatory=$true)][String]$FullDir
     )
     $Positions = @("DST", "FLEX", "QB", "RB1", "RB2", "TE", "WR1", "WR2", "WR3")
     $LineupCsv = Import-Csv -Path $OpponentCsv | Select-Object *,"QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST","Projection","Ownership","Ceiling"        
@@ -112,7 +113,7 @@ Function Get-Lineups {
         $FormattedLineup = Get-FormattedLineup -LineupArray $Lineup
         $Roster = Get-Roster -positions $Positions -rosterString $FormattedLineup
         $ProjectionTotal = 0
-        $OwnershipTotal = 0
+        $OwnershipTotal = 1
         $CeilingTotal = 0
         foreach ($Position in $Positions) {
             $Name = $($Roster[$Position]).Trim($Position)
@@ -125,11 +126,11 @@ Function Get-Lineups {
                 | Where-Object {$_.Name -eq $NameFinal} `
                 | Select-Object -Property "DK Projection","DK Ownership","DK Ceiling"
             $ProjectionTotal += $Lookup."DK Projection"
-            $OwnershipTotal += $Lookup."DK Ownership"
+            $OwnershipTotal *= $Lookup."DK Ownership"
             $CeilingTotal += $Lookup."DK Ceiling"
         }
         $LineupCsv[$i].'Projection' = $ProjectionTotal
-        $LineupCsv[$i].'Ownership' = $OwnershipTotal
+        $LineupCsv[$i].'Ownership' = $OwnershipTotal / 1000
         $LineupCsv[$i].'Ceiling' = $CeilingTotal
     }
     $MissingPlayers = Get-ValidNames -Names ($LineupCsv | Select-Object -Property "QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST") -Projections ($ProjCsv).Name -Positions $Positions
@@ -139,11 +140,11 @@ Function Get-Lineups {
             | Export-Csv -Path $OpponentCsv -NoTypeInformation -Force
     }
     else {
-        $MissingPlayers | Out-File -FilePath 'G:\My Drive\Fantasy Football\DFS\2022\Week13\MissingPlayers.txt' -Force
-        #Remove-Item $OpponentCsv
+        $MissingPlayers | Out-File -FilePath $FullDir"\MissingPlayers.txt" -Force
+        Remove-Item $OpponentCsv
     }
 }
 $FullDir = Join-Path -Path $DfsDir -ChildPath "Week$Week"
 $Projections = $FullDir+"\ETRProj.csv"
 $OpponentCsv = Get-OpponentCsv -Week $Week -FullDir $FullDir -MyUser $MyUser
-$LineupCsv = Get-Lineups -OpponentCsv $OpponentCsv -Projections $Projections
+$LineupCsv = Get-Lineups -OpponentCsv $OpponentCsv -Projections $Projections -FullDir $FullDir
