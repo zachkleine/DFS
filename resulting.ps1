@@ -117,6 +117,9 @@ Function Get-Lineups {
         foreach ($Position in $Positions) {
             $Name = $($Roster[$Position]).Trim($Position)
             $NameFinal = $Name.Trim(" ")
+            if ($Position -eq "DST") {
+                $NameFinal = $NameFinal+" "
+            }
             $LineupCsv[$i].$Position = $NameFinal
             $Lookup = $ProjCsv `
                 | Where-Object {$_.Name -eq $Name} `
