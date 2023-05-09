@@ -77,7 +77,6 @@ Function Get-Lineups {
                 $CeilingTotal += $Lookup."DK Ceiling"
             }
             $Lineup.'Projection' = ($ProjectionTotal | Measure-Object -Sum).Sum
-            #write-host $OwnershipTotal
             if ($OwnershipTotal -gt 0) {
                 $Lineup.'Ownership' = Get-ProductOwnership -OwnershipTotal $OwnershipTotal
             }
