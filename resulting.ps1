@@ -37,66 +37,6 @@ Function Get-OpponentCsv {
     Pop-Location
     Return $OppCsv
 }
-Function Get-FormattedLineup {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory=$true)][System.Object]$LineupArray
-    )
-    $RbCount = 0
-    $WrCount = 0
-    foreach ($pos in 0..($LineupArray.Length - 1)) {
-        switch ($Lineup[$pos]) {
-            "RB" {
-                $RbCount++
-                $LineupArray[$pos] = "RB$RbCount"
-            }
-            "WR" {
-                $WrCount++
-                $LineupArray[$pos] = "WR$WrCount"
-            }
-        }
-    }
-    Return $LineupArray
-}
-Function Get-ValidNames {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory=$true)][string[]]$Names,
-        [Parameter(Mandatory=$true)][string[]]$Projections,
-        [Parameter(Mandatory=$true)][String[]]$Positions
-    )
-    foreach ($Position in $Positions) {
-        write-host $Names | Select-Object -Property $Position | Where-Object {$_.$Position -ne " "}
-        $list += ($Names | Select-Object -Property $Position | Where-Object {$_.$Position -ne " "}).$Position
-    }
-    $ResultsList = $list | Sort-Object | Get-Unique
-    foreach ($Result in $ResultsList) {
-        if ($Projections -notcontains $Result) {
-            $MissingPlayers += $Result
-        }
-    }
-    return $MissingPlayers
-}
-Function Get-Roster {
-    param (
-        [string]$rosterString,
-        [string[]]$positions
-    )
-    $roster = @{}
-    $rosterString = $rosterString -split '\s+'
-    for ($i = 0; $i -lt $positions.Length; $i++) {
-        $pos = $positions[$i]
-        $nextPos = $positions[$i+1]
-        $startIndex = $rosterString.IndexOf($pos)
-        $endIndex = $rosterString.IndexOf($nextPos)
-        if ($endIndex -eq -1) {
-            $endIndex = $rosterString.Length
-        }
-        $text = $rosterString[$startIndex..($endIndex-1)] -join ''
-        $roster[$pos] = $text
-    }
-    return $roster
-}
 Function Get-Lineups {
     [CmdletBinding()]
     param(
@@ -143,6 +83,66 @@ Function Get-Lineups {
         $MissingPlayers | Out-File -FilePath $FullDir"\MissingPlayers.txt" -Force
         Remove-Item $OpponentCsv
     }
+}
+Function Get-FormattedLineup {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true)][System.Object]$LineupArray
+    )
+    $RbCount = 0
+    $WrCount = 0
+    foreach ($pos in 0..($LineupArray.Length - 1)) {
+        switch ($Lineup[$pos]) {
+            "RB" {
+                $RbCount++
+                $LineupArray[$pos] = "RB$RbCount"
+            }
+            "WR" {
+                $WrCount++
+                $LineupArray[$pos] = "WR$WrCount"
+            }
+        }
+    }
+    Return $LineupArray
+}
+Function Get-Roster {
+    param (
+        [string]$rosterString,
+        [string[]]$positions
+    )
+    $roster = @{}
+    $rosterString = $rosterString -split '\s+'
+    for ($i = 0; $i -lt $positions.Length; $i++) {
+        $pos = $positions[$i]
+        $nextPos = $positions[$i+1]
+        $startIndex = $rosterString.IndexOf($pos)
+        $endIndex = $rosterString.IndexOf($nextPos)
+        if ($endIndex -eq -1) {
+            $endIndex = $rosterString.Length
+        }
+        $text = $rosterString[$startIndex..($endIndex-1)] -join ''
+        $roster[$pos] = $text
+    }
+    return $roster
+}
+Function Get-ValidNames {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true)][string[]]$Names,
+        [Parameter(Mandatory=$true)][string[]]$Projections,
+        [Parameter(Mandatory=$true)][String[]]$Positions
+    )
+    foreach ($Position in $Positions) {
+        write-host $Names | Select-Object -Property $Position | Where-Object {$_.$Position -ne " "}
+        $list += ($Names | Select-Object -Property $Position | Where-Object {$_.$Position -ne " "}).$Position
+    }
+    $ResultsList = $list | Sort-Object | Get-Unique
+    foreach ($Result in $ResultsList) {
+        if ($Projections -notcontains $Result) {
+            $MissingPlayers += $Result
+        }
+    }
+    return $MissingPlayers
 }
 $FullDir = Join-Path -Path $DfsDir -ChildPath "Week$Week"
 $Projections = $FullDir+"\ETRProj.csv"
