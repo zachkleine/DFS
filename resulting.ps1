@@ -52,9 +52,9 @@ Function Get-Lineups {
         $Lineup = $FullLineup[$i].split(" ")
         $FormattedLineup = Get-FormattedLineup -LineupArray $Lineup
         $Roster = Get-Roster -positions $Positions -rosterString $FormattedLineup
-        $ProjectionTotal = 0
-        $OwnershipTotal = 1
-        $CeilingTotal = 0
+        $ProjectionTotal = @()
+        $OwnershipTotal = @()
+        $CeilingTotal = @()
         foreach ($Position in $Positions) {
             $Name = $($Roster[$Position]).Trim($Position)
             $NameFinal = $Name.Trim(" ")
@@ -66,12 +66,18 @@ Function Get-Lineups {
                 | Where-Object {$_.Name -eq $NameFinal} `
                 | Select-Object -Property "DK Projection","DK Ownership","DK Ceiling"
             $ProjectionTotal += $Lookup."DK Projection"
-            $OwnershipTotal *= $Lookup."DK Ownership"
+            $OwnershipTotal += $Lookup."DK Ownership"
             $CeilingTotal += $Lookup."DK Ceiling"
         }
-        $LineupCsv[$i].'Projection' = $ProjectionTotal
-        $LineupCsv[$i].'Ownership' = $OwnershipTotal / 1000
-        $LineupCsv[$i].'Ceiling' = $CeilingTotal
+        $LineupCsv[$i].'Projection' = ($ProjectionTotal | Measure-Object -Sum).Sum
+        write-host $OwnershipTotal
+        if ($OwnershipTotal.Count -ge 1) {
+            $LineupCsv[$i].'Ownership' = Get-ProductOwnership -OwnershipTotal $OwnershipTotal
+        }
+        else {
+            $LineupCsv[$i].'Ownership' = 0
+        }
+        $LineupCsv[$i].'Ceiling' = ($CeilingTotal | Measure-Object -Sum).Sum
     }
     $MissingPlayers = Get-ValidNames -Names ($LineupCsv | Select-Object -Property "QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST") -Projections ($ProjCsv).Name -Positions $Positions
     If (!$MissingPlayers) {
@@ -133,7 +139,6 @@ Function Get-ValidNames {
         [Parameter(Mandatory=$true)][String[]]$Positions
     )
     foreach ($Position in $Positions) {
-        write-host $Names | Select-Object -Property $Position | Where-Object {$_.$Position -ne " "}
         $list += ($Names | Select-Object -Property $Position | Where-Object {$_.$Position -ne " "}).$Position
     }
     $ResultsList = $list | Sort-Object | Get-Unique
@@ -143,6 +148,20 @@ Function Get-ValidNames {
         }
     }
     return $MissingPlayers
+}
+Function Get-ProductOwnership {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true)][string[]]$OwnershipTotal
+    )
+    $product = 1
+    foreach ($value in $OwnershipTotal) {
+        if ($value -ne 0) {
+            $product *= $value
+        }
+    }
+    $total = $product / 1000
+    return $total
 }
 $FullDir = Join-Path -Path $DfsDir -ChildPath "Week$Week"
 $Projections = $FullDir+"\ETRProj.csv"
