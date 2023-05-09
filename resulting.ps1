@@ -115,20 +115,15 @@ Function Get-Lineups {
         $OwnershipTotal = 0
         $CeilingTotal = 0
         foreach ($Position in $Positions) {
-            $Name = $($Roster[$Position]).Trim($Position, " ")
-            write-host $Name
-            #$LineupCsv[$i].$Position = $Name
-            #write-host $($Roster[$Position])
-            #write-host $LineupCsv[$i].$Position
-            <#$pos = $Lineup.indexof($Position)
-            $Name = $Lineup[$pos+1] + " " + $Lineup[$pos+2]
-            $LineupCsv[$i].$Position = $Name
+            $Name = $($Roster[$Position]).Trim($Position)
+            $NameFinal = $Name.Trim(" ")
+            $LineupCsv[$i].$Position = $NameFinal
             $Lookup = $ProjCsv `
                 | Where-Object {$_.Name -eq $Name} `
                 | Select-Object -Property "DK Projection","DK Ownership","DK Ceiling"
             $ProjectionTotal += $Lookup."DK Projection"
             $OwnershipTotal += $Lookup."DK Ownership"
-            $CeilingTotal += $Lookup."DK Ceiling"#>
+            $CeilingTotal += $Lookup."DK Ceiling"
         }
         $LineupCsv[$i].'Projection' = $ProjectionTotal
         $LineupCsv[$i].'Ownership' = $OwnershipTotal
