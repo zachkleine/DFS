@@ -52,9 +52,6 @@ Function Get-Lineups {
         $Lineup = $FullLineup[$i].split(" ")
         $FormattedLineup = Get-FormattedLineup -LineupArray $Lineup
         $Roster = Get-Roster -positions $Positions -rosterString $FormattedLineup
-        $ProjectionTotal = @()
-        $OwnershipTotal = @()
-        $CeilingTotal = @()
         foreach ($Position in $Positions) {
             $Name = $($Roster[$Position]).Trim($Position)
             $NameFinal = $Name.Trim(" ")
@@ -62,25 +59,33 @@ Function Get-Lineups {
                 $NameFinal = $NameFinal+" "
             }
             $LineupCsv[$i].$Position = $NameFinal
-            $Lookup = $ProjCsv `
-                | Where-Object {$_.Name -eq $NameFinal} `
-                | Select-Object -Property "DK Projection","DK Ownership","DK Ceiling"
-            $ProjectionTotal += $Lookup."DK Projection"
-            $OwnershipTotal += $Lookup."DK Ownership"
-            $CeilingTotal += $Lookup."DK Ceiling"
         }
-        $LineupCsv[$i].'Projection' = ($ProjectionTotal | Measure-Object -Sum).Sum
-        write-host $OwnershipTotal
-        if ($OwnershipTotal.Count -ge 1) {
-            $LineupCsv[$i].'Ownership' = Get-ProductOwnership -OwnershipTotal $OwnershipTotal
-        }
-        else {
-            $LineupCsv[$i].'Ownership' = 0
-        }
-        $LineupCsv[$i].'Ceiling' = ($CeilingTotal | Measure-Object -Sum).Sum
     }
-    $MissingPlayers = Get-ValidNames -Names ($LineupCsv | Select-Object -Property "QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST") -Projections ($ProjCsv).Name -Positions $Positions
+    $MissingPlayers = Get-ValidateNames -Names ($LineupCsv | Select-Object -Property "QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST") -Projections ($ProjCsv).Name -Positions $Positions
     If (!$MissingPlayers) {
+        #if valid do the calculations and output csv
+        foreach ($Lineup in $LineupCsv) {
+            $ProjectionTotal = @()
+            $OwnershipTotal = @()
+            $CeilingTotal = @()
+            foreach ($Position in $Positions) {
+                $Lookup = $ProjCsv `
+                    | Where-Object {$_.Name -eq $Lineup.$Position} `
+                    | Select-Object -Property "DK Projection","DK Ownership","DK Ceiling"
+                $ProjectionTotal += $Lookup."DK Projection"
+                $OwnershipTotal += $Lookup."DK Ownership"
+                $CeilingTotal += $Lookup."DK Ceiling"
+                write-host $OwnershipTotal.Count
+            }
+            $Lineup.'Projection' = ($ProjectionTotal | Measure-Object -Sum).Sum
+            if ($OwnershipTotal.Count -ge 1) {
+                $Lineup.'Ownership' = Get-ProductOwnership -OwnershipTotal $OwnershipTotal
+            }
+            else {
+                $Lineup.'Ownership' = 0
+            }
+            $Lineup.'Ceiling' = ($CeilingTotal | Measure-Object -Sum).Sum
+        } 
         $LineupCsv `
             | Select-Object "EntryName","QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST","Points","Projection","Ownership","Ceiling" `
             | Export-Csv -Path $OpponentCsv -NoTypeInformation -Force
@@ -131,15 +136,15 @@ Function Get-Roster {
     }
     return $roster
 }
-Function Get-ValidNames {
+Function Get-ValidateNames {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true)][string[]]$Names,
-        [Parameter(Mandatory=$true)][string[]]$Projections,
+        [Parameter(Mandatory=$true)][System.Object]$Names,
+        [Parameter(Mandatory=$true)][System.Object]$Projections,
         [Parameter(Mandatory=$true)][String[]]$Positions
     )
     foreach ($Position in $Positions) {
-        $list += ($Names | Select-Object -Property $Position | Where-Object {$_.$Position -ne " "}).$Position
+        $list += ($Names | Select-Object -Property $Position | Where-Object {$_.$Position -ne " "}).$Position | Sort-Object | Get-Unique
     }
     $ResultsList = $list | Sort-Object | Get-Unique
     foreach ($Result in $ResultsList) {
