@@ -9,15 +9,11 @@ Function Get-UDExposure {
     $DraftCount = ($ExposureCsv.Draft | Get-Unique).Count
     foreach ($Line in $ExposureCsv) {
         $Line."Name" = $Line."First Name"+" "+$Line."Last Name"
-    }
-    $PlayerList = $ExposureCsv."Name" | Sort-Object | Get-Unique
-    foreach ($Player in $PlayerList) {
-        $Count = $ExposureCsv."Name" | Where-Object {$_ -eq $Player} | Measure-Object | Select-Object -ExpandProperty Count
+        $Count = $ExposureCsv."Name" | Where-Object {$_ -eq $Line."Name"} | Measure-Object | Select-Object -ExpandProperty Count
         $Exposure = (($Count/$DraftCount) * 100).ToString("N2") + "%"
-        #Write $exposure to exposure column
-        
+        $Line."Exposure" = $Exposure
     }
+    $ExposureCsv | Sort-Object -Property "Name" | Get-Unique
     Return $ExposureCsv
 }
 $Csv = Get-UDExposure
-#export Csv 
