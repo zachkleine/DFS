@@ -19,4 +19,4 @@ Function Get-UDExposure {
     $PlayerCounts | Select-Object -Property Name,Exposure | Export-Csv -Path "UD_Exposure.csv" -NoTypeInformation -Force
     Pop-Location
 }
-$Csv = Get-UDExposure
+Get-UDExposure
