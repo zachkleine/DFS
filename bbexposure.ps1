@@ -34,12 +34,9 @@ Function Get-DKExposure {
     )
     Push-Location -Path $BBDir
     $FilePath = Join-Path -Path $BBDir -ChildPath $DK_csv
-    $ExposureCsv = Import-Csv -Path $FilePath | Select-Object -Property "First Name", "Last Name", "Draft", "Name"
-    $DraftCount = ($ExposureCsv.Draft | Get-Unique).Count
-    foreach ($Line in $ExposureCsv) {
-        $Line."Name" = $Line."First Name"+" "+$Line."Last Name"
-    }
-    $PlayerCounts = $ExposureCsv."Name" | Group-Object | Select-Object Name, Count, Exposure
+    $ExposureCsv = Import-Csv -Path $FilePath | Select-Object -Property "Player", "Round"
+    $DraftCount = ($ExposureCsv.Round | Where-Object {$_ -eq "1"}).Count
+    $PlayerCounts = $ExposureCsv.Player | Group-Object | Select-Object -Property "Name", "Count", "Exposure"
     foreach ($Player in $PlayerCounts) {
         $Exposure = (($Player.Count/$DraftCount) * 100).ToString("N2") + "%"
         $Player.Exposure = $Exposure
@@ -58,7 +55,7 @@ Function Add-Files {
         "Best-Ball---DK-Ranks.csv" = "DK_ADP"
         "Best-Ball---UD-Ranks.csv" = "UD_ADP"
         "UD_Exposure.csv" = "UD_Exposure"
-        #"DK_Exposure.csv" = "DK_Exposure"
+        "DK_Exposure.csv" = "DK_Exposure"
     }
     foreach ($key in $hashTable.GetEnumerator()) {
         $data = Import-Csv -Path $key.Name
@@ -67,5 +64,5 @@ Function Add-Files {
     Pop-Location
 }
 Get-UDExposure -BBDir $BBDir -UD_csv $UD_csv
-#Get-DKExpsoure -BBDir $BBDir -DK_csv $DK_csv
+Get-DKExposure -BBDir $BBDir -DK_csv $DK_csv
 Add-Files -BBDir $BBDir
