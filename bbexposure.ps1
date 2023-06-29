@@ -23,7 +23,7 @@ Function Get-UDExposure {
         $Exposure = (($Player.Count/$DraftCount) * 100).ToString("N2") + "%"
         $Player.Exposure = $Exposure
     }
-    $PlayerCounts | Select-Object -Property Name,Exposure | Export-Csv -Path "UD_Exposure.csv" -NoTypeInformation -Force
+    $PlayerCounts | Select-Object -Property Name,Team,Pos,Exposure | Export-Csv -Path "UD_Exposure.csv" -NoTypeInformation -Force
     Pop-Location
 }
 Function Get-DKExposure {
