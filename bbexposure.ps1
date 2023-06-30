@@ -13,17 +13,19 @@ Function Get-UDExposure {
     )
     Push-Location -Path $BBDir
     $FilePath = Join-Path -Path $BBDir -ChildPath $UD_csv
-    $ExposureCsv = Import-Csv -Path $FilePath | Select-Object -Property "First Name", "Last Name", "Draft", "Name"
+    $ExposureCsv = Import-Csv -Path $FilePath | Select-Object -Property "First Name", "Last Name", "Draft", "Name", "Team", "Position"
     $DraftCount = ($ExposureCsv.Draft | Get-Unique).Count
     foreach ($Line in $ExposureCsv) {
         $Line."Name" = $Line."First Name"+" "+$Line."Last Name"
     }
-    $PlayerCounts = $ExposureCsv."Name" | Group-Object | Select-Object Name, Count, Exposure
+    $PlayerCounts = $ExposureCsv."Name" | Group-Object | Select-Object Name, Count, Exposure, Team, Position
     foreach ($Player in $PlayerCounts) {
         $Exposure = (($Player.Count/$DraftCount) * 100).ToString("N2") + "%"
         $Player.Exposure = $Exposure
+        $Player.Position = ($ExposureCsv | Select-Object -Property "Position", "Name" | Where-Object {$_.Name -eq $Player.Name}).Position | Get-Unique
+        $Player.Team = ($ExposureCsv | Select-Object -Property "Team", "Name" | Where-Object {$_.Name -eq $Player.Name}).Team | Get-Unique
     }
-    $PlayerCounts | Select-Object -Property Name,Exposure | Export-Csv -Path "UD_Exposure.csv" -NoTypeInformation -Force
+    $PlayerCounts | Select-Object -Property Name,Position,Team,Exposure | Export-Csv -Path "UD_Exposure.csv" -NoTypeInformation -Force
     Pop-Location
 }
 Function Get-DKExposure {
