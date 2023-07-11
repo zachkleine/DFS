@@ -69,7 +69,12 @@ Function Add-Files {
         elseif ($key.Name -Match "UD") {
             foreach ($Player in $data) {
                 $lookup = $UDExposure | Where-Object {$_.Name -eq $Player.Name}
-                $Player.Exposure = $lookup.Exposure
+                if ($lookup) {
+                    $Player.Exposure = $lookup.Exposure
+                }
+                else {
+                    $Player.Exposure = "0%"
+                }
             }
         }
         $data | Export-Excel -Path $ExcelFile -WorksheetName $key.Value
