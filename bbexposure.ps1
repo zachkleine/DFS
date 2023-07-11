@@ -58,7 +58,12 @@ Function Add-Files {
         if ($key.Name -match "DK") {
             foreach ($Player in $data) {
                 $lookup = $DKExposure | Where-Object {$_.Name -eq $Player.Name}
-                $Player.Exposure = $lookup.Exposure
+                if ($lookup) {
+                    $Player.Exposure = $lookup.Exposure
+                }
+                else {
+                    $Player.Exposure = "0%"
+                }
             }
         }
         elseif ($key.Name -Match "UD") {
