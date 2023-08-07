@@ -16,17 +16,18 @@ def get_dk_salaries(dfs_dir, week):
 
     dk_csv.to_csv(dk_csv_path, index=False)
 
+def get_dk_opto(dfs_dir, week):
+    full_dir = f"{dfs_dir}\\Week{week}"
+    dk_csv_path = f"{full_dir}\\DKSalaries.csv"
+    results_csv_path = f"{full_dir}\\dkcashopto.csv"
+
+    from pydfs_lineup_optimizer import get_optimizer, Site, Sport, CSVLineupExporter
+    DKOptimizer = get_optimizer(Site.DRAFTKINGS, Sport.FOOTBALL)
+    DKOptimizer.load_players_from_csv(dk_csv_path)
+    lineups = list(DKOptimizer.optimize(100))
+    DKOptimizer.export(results_csv_path)
+
 dfs_dir = "G:\\My Drive\\Fantasy Football\\DFS\\2023"
 week = int(input("Enter Week #"))
 get_dk_salaries(dfs_dir, week)
-
-"""
-Need to call PyDFS program
-from pydfs_lineup_optimizer import get_optimizer, Site, Sport, CSVLineupExporter
-
-DKoptimizer = get_optimizer(Site.DRAFTKINGS, Sport.FOOTBALL)
-DKoptimizer.load_players_from_csv('DKSalaries.csv')
-
-lineups = list(DKoptimizer.optimize(10))
-DKoptimizer.export('result.csv')
-"""
+get_dk_opto(dfs_dir, week)
