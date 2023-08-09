@@ -46,8 +46,6 @@ def get_dk_extras(dfs_dir, week):
     new_headers_df = pd.DataFrame(columns=additional_headers)
     df_with_headers = pd.concat([dk_opto, new_headers_df], axis=1)
     df_with_headers.to_csv(dk_opto_csv, index=False)
-    
-
 
 dfs_dir = "G:\\My Drive\\Fantasy Football\\DFS\\2023"
 week = "13"
