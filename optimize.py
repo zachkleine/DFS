@@ -1,4 +1,5 @@
 import pandas as pd
+import re
 
 def get_dk_salaries(dfs_dir, week):
     full_dir = f"{dfs_dir}\\Week{week}"
@@ -24,10 +25,16 @@ def get_dk_opto(dfs_dir, week):
     from pydfs_lineup_optimizer import get_optimizer, Site, Sport, CSVLineupExporter
     DKOptimizer = get_optimizer(Site.DRAFTKINGS, Sport.FOOTBALL)
     DKOptimizer.load_players_from_csv(dk_csv_path)
-    lineups = list(DKOptimizer.optimize(100))
+    lineups = list(DKOptimizer.optimize(2))
     DKOptimizer.export(results_csv_path)
 
+    dk_csv = pd.read_csv(results_csv_path)
+    def remove_parentheses(text): 
+        return re.sub(r'\([^)]*\)', '', str(text))
+    dk_csv = dk_csv.applymap(remove_parentheses)    
+    dk_csv.to_csv(results_csv_path, index=False)
+
 dfs_dir = "G:\\My Drive\\Fantasy Football\\DFS\\2023"
-week = int(input("Enter Week #"))
+week = "13"
 get_dk_salaries(dfs_dir, week)
 get_dk_opto(dfs_dir, week)
