@@ -11,7 +11,7 @@ def get_dk_salaries(dfs_dir, week):
 
     for _, row in dk_csv.iterrows():
         name = row['Name']
-        lookup = etr_csv.loc[etr_csv['Name'] == name, 'DK Projection']
+        lookup = etr_csv.loc[etr_csv['Player'] == name, 'DK Projection']
         if not lookup.empty:
             dk_csv.at[_, 'AvgPointsPerGame'] = lookup.iloc[0]
         else: 
@@ -50,7 +50,7 @@ def get_dk_extras(dfs_dir, week):
     df_with_headers.to_csv(dk_opto_csv, index=False)
 
 dfs_dir = "G:\\My Drive\\Fantasy Football\\DFS\\2023"
-week = "15"
+week = "1"
 get_dk_salaries(dfs_dir, week)
 get_dk_opto(dfs_dir, week)
 get_dk_extras(dfs_dir, week)
