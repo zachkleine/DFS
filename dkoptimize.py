@@ -4,7 +4,7 @@ import re
 def get_dk_salaries(dfs_dir, week):
     full_dir = f"{dfs_dir}\\Week{week}"
     dk_csv_path = f"{full_dir}\\DKSalaries.csv"
-    etr_csv_path = f"{full_dir}\\DKETRProj.csv"
+    etr_csv_path = f"{full_dir}\\DKCashPool.csv"
 
     dk_csv = pd.read_csv(dk_csv_path)
     etr_csv = pd.read_csv(etr_csv_path)
@@ -39,7 +39,7 @@ def get_dk_opto(dfs_dir, week):
 def get_dk_extras(dfs_dir, week): 
     full_dir = f"{dfs_dir}\\Week{week}"
     dk_opto_csv = f"{full_dir}\\dkcashopto.csv"
-    etr_csv_path = f"{full_dir}\\DKETRProj.csv"
+    etr_csv_path = f"{full_dir}\\DKCashPool.csv"
 
     etr_csv = pd.read_csv(etr_csv_path)
     dk_opto = pd.read_csv(dk_opto_csv)
