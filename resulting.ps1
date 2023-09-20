@@ -1,8 +1,8 @@
 Param(
     [CmdletBinding()]
-    [Parameter(Mandatory=$False)][String]$DfsDir = "G:\My Drive\Fantasy Football\DFS\2022",
-    [Parameter(Mandatory=$False)][int]$Week = "13",
-    [Parameter(Mandatory=$False)][String]$MyUser = "ZachKleine"
+    [Parameter(Mandatory=$False)][String]$DfsDir = "G:\My Drive\Fantasy Football\DFS\2023",
+    [Parameter(Mandatory=$False)][int]$Week = "1",
+    [Parameter(Mandatory=$False)][String]$MyUser = "notarealteamname"
 )
 Function Get-OpponentCsv {
     [CmdletBinding()]
@@ -46,7 +46,7 @@ Function Get-Lineups {
     )
     $Positions = @("DST", "FLEX", "QB", "RB1", "RB2", "TE", "WR1", "WR2", "WR3")
     $LineupCsv = Import-Csv -Path $OpponentCsv | Select-Object *,"QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST","Projection","Ownership","Ceiling"        
-    $ProjCsv = Import-Csv -Path $Projections | Select-Object "Name","DK Projection","DK Ownership","DK Ceiling"
+    $ProjCsv = Import-Csv -Path $Projections | Select-Object "Player","DK Projection","DK Large Ownership","DK Ceiling"
     $FullLineup = ($LineupCsv).Lineup
     for ($i=0;$i -lt $FullLineup.Count;$i++) {
         $Lineup = $FullLineup[$i].split(" ")
@@ -61,7 +61,7 @@ Function Get-Lineups {
             $LineupCsv[$i].$Position = $Name
         }
     }
-    $MissingPlayers = Get-ValidateNames -Names ($LineupCsv | Select-Object -Property "QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST") -Projections ($ProjCsv).Name -Positions $Positions
+    $MissingPlayers = Get-ValidateNames -Names ($LineupCsv | Select-Object -Property "QB","RB1","RB2","WR1","WR2","WR3","TE","FLEX","DST") -Projections ($ProjCsv).Player -Positions $Positions
     If (!$MissingPlayers) {
         foreach ($Lineup in $LineupCsv) {
             $ProjectionTotal = @()
@@ -69,19 +69,20 @@ Function Get-Lineups {
             $CeilingTotal = @()
             foreach ($Position in $Positions) {
                 $Lookup = $ProjCsv `
-                    | Where-Object {$_.Name -eq $Lineup.$Position} `
-                    | Select-Object -Property "DK Projection","DK Ownership","DK Ceiling"
+                    | Where-Object {$_.Player -eq $Lineup.$Position} `
+                    | Select-Object -Property "DK Projection","DK Large Ownership","DK Ceiling"
                 $ProjectionTotal += $Lookup."DK Projection"
-                $OwnershipTotal += $Lookup."DK Ownership"
+                $OwnershipTotal += $Lookup."DK Large Ownership"
                 $CeilingTotal += $Lookup."DK Ceiling"
             }
             $Lineup.'Projection' = ($ProjectionTotal | Measure-Object -Sum).Sum
-            if ($OwnershipTotal -gt 0) {
+            $Lineup.'Ownership' = ($OwnershipTotal | Measure-Object -Sum).Sum
+            <#if ($OwnershipTotal -gt 0) {
                 $Lineup.'Ownership' = Get-ProductOwnership -OwnershipTotal $OwnershipTotal
             }
             else {
                 $Lineup.'Ownership' = 0
-            }
+            }#>
             $Lineup.'Ceiling' = ($CeilingTotal | Measure-Object -Sum).Sum
         } 
         $LineupCsv `
@@ -147,7 +148,7 @@ Function Get-ValidateNames {
     $ResultsList = $list | Sort-Object | Get-Unique
     foreach ($Result in $ResultsList) {
         if ($Projections -notcontains $Result) {
-            $MissingPlayers += $Result
+            $MissingPlayers += $Result+"`n"
         }
     }
     return $MissingPlayers
@@ -166,7 +167,7 @@ Function Get-ProductOwnership {
     $total = $product / 1000
     return $total
 }
-$FullDir = Join-Path -Path $DfsDir -ChildPath "Week$Week"
-$Projections = $FullDir+"\ETRProj.csv"
+$FullDir = Join-Path -Path $DfsDir -ChildPath "week$Week"
+$Projections = $FullDir+"\DKETRProj.csv"
 $OpponentCsv = Get-OpponentCsv -Week $Week -FullDir $FullDir -MyUser $MyUser
 $LineupCsv = Get-Lineups -OpponentCsv $OpponentCsv -Projections $Projections -FullDir $FullDir
