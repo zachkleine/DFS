@@ -1,6 +1,7 @@
 Param(
     [CmdletBinding()]
-    [Parameter(Mandatory=$False)][String]$BBDir = "G:\My Drive\Fantasy Football\BestBall",
+    [Parameter(Mandatory=$False)][String]$BBDir = "G:\My Drive\Fantasy Football\BestBall\",
+    [Parameter(Mandatory=$False)][String]$ExcelFile = "BestBallBuddy.xlsx",
     [Parameter(Mandatory=$False)][String]$UD_csv = "UD_Exposure_Raw.csv",
     [Parameter(Mandatory=$False)][String]$DK_csv = "DK_Exposure_Raw.csv"
 )
@@ -80,7 +81,18 @@ Function Add-Files {
         $data | Export-Excel -Path $ExcelFile -WorksheetName $key.Value
     }
 }
+Function Get-NewDKDraft {
+    $NewDKDraft = Import-Excel -Path $ExcelFile -WorksheetName 'DK_Draft' | Select-Object Round, Player, Pos, Team, Wk17, Pick, ADP, 'ADP Value'
+    $ExposureCSV = Import-Csv -path $DK_csv
+    $LastDKDraft = ($ExposureCsv[-20..-1]).Player
+    $CompareDrafts = Compare-Object -ReferenceObject $LastDKDraft -DifferenceObject ($NewDKDraft).Player
+    if ($CompareDrafts.count -gt 0) {
+        $ExposureCSV += $NewDKDraft
+        $ExposureCSV | Export-Csv -Path $DK_csv -NoTypeInformation -Force
+    }
+}
 Push-Location -Path $BBDir
+Get-NewDKDraft
 $UDExposure = Get-UDExposure -UD_csv $UD_csv
 $DKExposure = Get-DKExposure -DK_csv $DK_csv
 Add-Files -DKExposure $DKExposure -UDExposure $UDExposure
