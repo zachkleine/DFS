@@ -2,8 +2,8 @@ Param(
     [CmdletBinding()]
     [Parameter(Mandatory=$False)][String]$BBDir = "G:\My Drive\Fantasy Football\BestBall\",
     [Parameter(Mandatory=$False)][String]$ExcelFile = "BestBallBuddy.xlsx",
-    [Parameter(Mandatory=$False)][String]$UD_csv = "UD_Exposure_Raw.csv",
-    [Parameter(Mandatory=$False)][String]$DK_csv = "DK_Exposure_Raw.csv"
+    [Parameter(Mandatory=$False)][String]$UD_csv = "UD_Exposure.csv",
+    [Parameter(Mandatory=$False)][String]$DK_csv = "DK_Exposure.csv"
 )
 Import-Module -Name ImportExcel
 Function Get-UDExposure {
