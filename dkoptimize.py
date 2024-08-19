@@ -52,7 +52,7 @@ def get_dk_opto(dfs_dir, week):
     DKOptimizer.add_stack(PositionsStack(['QB', ('WR', 'TE'),('WR', 'TE')]))
 
     #DKOptimizer.restrict_positions_for_opposing_team(['QB'],['DST'])
-
+    
     TDRBs = PlayersGroup(DKOptimizer.player_pool.get_players('David Montgomery', 'Gus Edwards'), max_from_group=1)
     DKOptimizer.add_players_group(TDRBs)
     CheapDETWRs = PlayersGroup(DKOptimizer.player_pool.get_players('Jameson Williams','Josh Reynolds'), max_from_group=1)

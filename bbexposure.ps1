@@ -13,7 +13,7 @@ Function Get-UDExposure {
     )
     $FilePath = Join-Path -Path $BBDir -ChildPath $UD_csv
     $ExposureCsv = Import-Csv -Path $FilePath | Select-Object -Property "First Name", "Last Name", "Draft", "Name", "Team", "Position"
-    $DraftCount = ($ExposureCsv.Draft | Get-Unique).Count
+    $DraftCount = ($ExposureCsv.Draft | Sort-Object | Get-Unique).Count
     foreach ($Line in $ExposureCsv) {
         $Line."Name" = $Line."First Name"+" "+$Line."Last Name"
     }
@@ -91,8 +91,15 @@ Function Get-NewDKDraft {
         $ExposureCSV | Export-Csv -Path $DK_csv -NoTypeInformation -Force
     }
 }
+Function Get-BuildInfo {
+    $NewDKDraftInfo = Import-Excel -Path $ExcelFile -WorksheetName 'DK_Draft' | Select-Object 'Build Info',"Data"
+    $BuildInfo = $NewDKDraftInfo | Where-Object { $_.'Build Info' }
+    write-host $BuildInfo.Data
+    
+}
 Push-Location -Path $BBDir
 Get-NewDKDraft
+#Get-BuildInfo
 $UDExposure = Get-UDExposure -UD_csv $UD_csv
 $DKExposure = Get-DKExposure -DK_csv $DK_csv
 Add-Files -DKExposure $DKExposure -UDExposure $UDExposure
