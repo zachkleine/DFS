@@ -1,0 +1,1 @@
+Example file to reference common rules when working with optomizer
