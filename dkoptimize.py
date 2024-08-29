@@ -21,16 +21,25 @@ def get_dk_salaries(dk_csv_path, etr_csv_path):
     etr_csv = pd.read_csv(etr_csv_path)
     for _, row in dk_csv.iterrows():
         name = row['Name']
+
         lookuppts = etr_csv.loc[etr_csv['Player'] == name, 'DK Projection']
         if not lookuppts.empty:
             dk_csv.at[_, 'AvgPointsPerGame'] = lookuppts.iloc[0]
         else: 
             dk_csv.at[_, 'AvgPointsPerGame'] = 0
+        
         lookupown = etr_csv.loc[etr_csv['Player'] == name, 'DK Large Ownership']
         if not lookupown.empty:
             dk_csv.at[_, 'Projected Ownership'] = lookupown.iloc[0]
         else: 
             dk_csv.at[_, 'Projected Ownership'] = 0
+        
+        lookupceiling = etr_csv.loc[etr_csv['Player'] == name, 'DK Ceiling']
+        if not lookupceiling.empty:
+            dk_csv.at[_, 'Projection Ceil'] = lookupceiling.iloc[0]
+        else: 
+            dk_csv.at[_, 'Projection Ceil'] = 0
+
     dk_csv.to_csv(dk_csv_path, index=False)
 
 def get_dk_opto(dk_csv_path, results_csv_path):
@@ -58,12 +67,16 @@ def get_dk_ownership(dk_csv_path, results_csv_path):
         for idx, row in enumerate(reader):
             team = (row[:9])
             totalOwn = 0
+            totalCeiling = 0
             for player in team:
                 lookupown = dk_csv.loc[dk_csv['Name'] == player, 'Projected Ownership']
                 if not lookupown.empty:
                     totalOwn += lookupown.iloc[0]
                 dk_opto.at[idx, 'Ownership'] = totalOwn
-
+                lookupceiling = dk_csv.loc[dk_csv['Name'] == player, 'Projection Ceil']
+                if not lookupceiling.empty: 
+                    totalCeiling += lookupceiling.iloc[0]
+                dk_opto.at[idx, 'Ceiling'] = totalOwn
     # Save the updated DataFrame back to the CSV file
     dk_opto.to_csv(results_csv_path, index=False)
 
