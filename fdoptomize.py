@@ -28,13 +28,21 @@ def get_fd_salaries(fd_csv_path, etr_csv_path):
     fd_csv.to_csv(fd_csv_path, index=False)
 
 def get_fd_opto(fd_csv_path, results_csv_path):
-    from pydfs_lineup_optimizer import get_optimizer, Site, Sport, CSVLineupExporter
+    from pydfs_lineup_optimizer import get_optimizer, Site, Sport, CSVLineupExporter, PlayersGroup
     FDOptimizer = get_optimizer(Site.FANDUEL, Sport.FOOTBALL)
     FDOptimizer.load_players_from_csv(fd_csv_path)
     ## RULES SECTION
     FDOptimizer.set_min_salary_cap(59700)
+    FDOptimizer.player_pool.lock_player('')
+    TopPlays = PlayersGroup(FDOptimizer.player_pool.get_players('',
+                                                               '',
+                                                               '',
+                                                               '',
+                                                               ''), 
+                                                               min_from_group=9)
+    FDOptimizer.add_players_group(TopPlays)
     ## END RULES
-    list(FDOptimizer.optimize(10))
+    list(FDOptimizer.optimize(50))
     FDOptimizer.export(results_csv_path)
 
 get_fd_salaries(fd_csv_path, etr_csv_path)
