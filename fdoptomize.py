@@ -10,10 +10,10 @@ if __name__ == '__main__':
     args = parse_args()
     week = args.week
 
-dfs_dir = "G:\\My Drive\\Fantasy Football\\DFS\\2023"
+dfs_dir = "G:\\My Drive\\Fantasy Football\\DFS\\2024"
 fd_csv_path = f"{dfs_dir}\\Week{week}\\FDSalaries.csv"
 etr_csv_path = f"{dfs_dir}\\Week{week}\\FDETRProj.csv"
-results_csv_path = f"{dfs_dir}\\Week{week}\\FDCashOpto.csv"
+results_csv_path = f"{dfs_dir}\\Week{week}\\FDOpto.csv"
 
 def get_fd_salaries(fd_csv_path, etr_csv_path):
     fd_csv = pd.read_csv(fd_csv_path)
