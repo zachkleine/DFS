@@ -11,10 +11,10 @@ if __name__ == '__main__':
     args = parse_args()
     week = args.week
 
-dfs_dir = "G:\\My Drive\\Fantasy Football\\DFS\\2023"
+dfs_dir = "G:\\My Drive\\Fantasy Football\\DFS\\2024"
 dk_csv_path = f"{dfs_dir}\\Week{week}\\DKSalaries.csv"
 etr_csv_path = f"{dfs_dir}\\Week{week}\\DKETRProj.csv"
-results_csv_path = f"{dfs_dir}\\Week{week}\\DKOpto.csv"
+results_csv_path = f"{dfs_dir}\\Week{week}\\DKSE3Max.csv"
 
 def get_dk_salaries(dk_csv_path, etr_csv_path):
     dk_csv = pd.read_csv(dk_csv_path)
@@ -48,7 +48,7 @@ def get_dk_opto(dk_csv_path, results_csv_path):
     DKOptimizer = get_optimizer(Site.DRAFTKINGS, Sport.FOOTBALL)
     DKOptimizer.load_players_from_csv(dk_csv_path)
     ## RULES SECTION
-    DKOptimizer.set_min_salary_cap(50000)
+    DKOptimizer.set_min_salary_cap(49800)
     DKOptimizer.add_players_group(PlayersGroup(
         players=[player for player in DKOptimizer.players if player.projected_ownership <= 0.10],
         min_from_group=2,
