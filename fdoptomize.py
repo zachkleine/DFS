@@ -32,7 +32,7 @@ def get_fd_opto(fd_csv_path, results_csv_path):
     FDOptimizer = get_optimizer(Site.FANDUEL, Sport.FOOTBALL)
     FDOptimizer.load_players_from_csv(fd_csv_path)
     ## RULES SECTION
-    FDOptimizer.set_min_salary_cap(59700)
+    FDOptimizer.set_min_salary_cap(59800)
     FDOptimizer.player_pool.lock_player('')
     TopPlays = PlayersGroup(FDOptimizer.player_pool.get_players('',
                                                                '',
