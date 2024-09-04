@@ -48,6 +48,8 @@ def get_dk_opto(dk_csv_path, results_csv_path):
     DKOptimizer = get_optimizer(Site.DRAFTKINGS, Sport.FOOTBALL)
     DKOptimizer.load_players_from_csv(dk_csv_path)
     ## RULES SECTION
+
+    #Double stacks with bring backs, leverage plays, low owned plays
     DKOptimizer.set_min_salary_cap(49800)
     DKOptimizer.add_players_group(PlayersGroup(
         players=[player for player in DKOptimizer.players if player.projected_ownership <= 0.10],
