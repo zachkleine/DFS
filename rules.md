@@ -8,7 +8,7 @@ Optimizer.player_pool.lock_player('')
 
 ## Takes listed players from group and builds based on that. Good for top plays on FD
 Group = PlayersGroup(Optimizer.player_pool.get_players(''), 
-        min_from_group=1)
+        min_from_group=9)
 Optimizer.add_players_group(Group)
 
 ## Prevents opponents of DST from being in lineup
@@ -29,3 +29,22 @@ Optimizer.force_positions_for_opposing_team(('QB', 'WR'))
 
 # Forces WR AND TE bring back
 Optimizer.force_positions_for_opposing_team(('QB', 'WR'),('QB','TE'))
+
+# Keeps max two players over 20% ownership
+Optimizer.add_players_group(PlayersGroup(
+        players=[player for player in Optimizer.players if player.projected_ownership >= 0.20],
+        max_from_group=2,
+))
+
+# Ensure two players under 10% ownership
+Optimizer.add_players_group(PlayersGroup(
+        players=[player for player in Optimizer.players if player.projected_ownership >= 0.20],
+        max_from_group=2,
+    ))
+
+# Add secondary game stack with at least two players from two teams with players with projection over x
+GameStack = PlayersGroup(Optimizer.player_pool.get_players(
+        PlayerFilter(teams=['','']),
+        PlayerFilter(filter_by='fppg',from_value=x)),
+        min_from_group=2,
+    )
