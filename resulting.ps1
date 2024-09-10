@@ -1,6 +1,6 @@
 Param(
     [CmdletBinding()]
-    [Parameter(Mandatory=$False)][String]$DfsDir = "G:\My Drive\Fantasy Football\DFS\2023",
+    [Parameter(Mandatory=$False)][String]$DfsDir = "G:\My Drive\Fantasy Football\DFS\2024",
     [Parameter(Mandatory=$False)][int]$Week = "1",
     [Parameter(Mandatory=$False)][String]$MyUser = "notarealteamname"
 )
