@@ -50,7 +50,7 @@ def get_dk_opto(dk_csv_path, results_csv_path):
     ## RULES SECTION
     DKOptimizer.set_min_salary_cap(49800)
     ## END RULES
-    list(DKOptimizer.optimize(50))
+    list(DKOptimizer.optimize(20))
     DKOptimizer.export(results_csv_path)
 
 def get_dk_ownership(dk_csv_path, results_csv_path):
@@ -77,7 +77,7 @@ def get_dk_ownership(dk_csv_path, results_csv_path):
                 lookupceiling = dk_csv.loc[dk_csv['Name'] == player, 'Projection Ceil']
                 if not lookupceiling.empty: 
                     totalCeiling += lookupceiling.iloc[0]
-                dk_opto.at[idx, 'Ceiling'] = totalOwn
+                dk_opto.at[idx, 'Ceiling'] = totalCeiling
     # Save the updated DataFrame back to the CSV file
     dk_opto.to_csv(results_csv_path, index=False)
 
