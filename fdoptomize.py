@@ -33,16 +33,12 @@ def get_fd_opto(fd_csv_path, results_csv_path):
     FDOptimizer.load_players_from_csv(fd_csv_path)
     ## RULES SECTION
     FDOptimizer.set_min_salary_cap(59800)
-    FDOptimizer.player_pool.lock_player('')
-    TopPlays = PlayersGroup(FDOptimizer.player_pool.get_players('',
-                                                               '',
-                                                               '',
-                                                               '',
-                                                               ''), 
+    FDOptimizer.restrict_positions_for_opposing_team(['RB'],['RB'])
+    TopPlays = PlayersGroup(FDOptimizer.player_pool.get_players(''), 
                                                                min_from_group=9)
     FDOptimizer.add_players_group(TopPlays)
     ## END RULES
-    list(FDOptimizer.optimize(50))
+    list(FDOptimizer.optimize(20))
     FDOptimizer.export(results_csv_path)
 
 get_fd_salaries(fd_csv_path, etr_csv_path)
