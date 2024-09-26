@@ -50,7 +50,7 @@ def get_dk_opto(dk_csv_path, results_csv_path):
     ## RULES SECTION
     DKOptimizer.set_min_salary_cap(49800)
     ## END RULES
-    list(DKOptimizer.optimize(20))
+    list(DKOptimizer.optimize(50))
     DKOptimizer.export(results_csv_path)
 
 def get_dk_ownership(dk_csv_path, results_csv_path):

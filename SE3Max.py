@@ -43,20 +43,47 @@ def get_dk_salaries(dk_csv_path, etr_csv_path):
     dk_csv.to_csv(dk_csv_path, index=False)
 
 def get_dk_opto(dk_csv_path, results_csv_path):
-    from pydfs_lineup_optimizer import get_optimizer, Site, Sport, CSVLineupExporter, PlayerFilter
+    from pydfs_lineup_optimizer import get_optimizer, Site, Sport, CSVLineupExporter, PlayerFilter, AfterEachExposureStrategy, RandomFantasyPointsStrategy
     from pydfs_lineup_optimizer.stacks import GameStack, TeamStack, PositionsStack, NestedPlayersGroup, OptimizerStack, Stack, PlayersGroup
     DKOptimizer = get_optimizer(Site.DRAFTKINGS, Sport.FOOTBALL)
     DKOptimizer.load_players_from_csv(dk_csv_path)
+    DKOptimizer.player_pool.add_filters(
+        PlayerFilter(from_value=2.7)
+    )
+    DKOptimizer.set_fantasy_points_strategy(RandomFantasyPointsStrategy(max_deviation=3))
+
     ## RULES SECTION
 
     #Stacking of some sort, leverage plays
     DKOptimizer.set_min_salary_cap(49800)
+    #DKOptimizer.restrict_positions_for_opposing_team(['DST'],['QB','RB','WR','TE'])
+    #DKOptimizer.restrict_positions_for_opposing_team(['RB'],['RB'])
+    #DKOptimizer.restrict_positions_for_same_team(('QB','RB'))
     DKOptimizer.add_players_group(PlayersGroup(
-        players=[player for player in DKOptimizer.players if player.projected_ownership <= 0.10],
-        min_from_group=2,
+        players=[player for player in DKOptimizer.players 
+            if player.projected_ownership <= 0.20],
+        min_from_group=2
     ))
+
+    ## Player Groups
+    Core = PlayersGroup(DKOptimizer.player_pool.get_players(), min_from_group=2,max_exposure=0.8)
+    
+    RBPool = PlayersGroup(DKOptimizer.player_pool.get_players(), min_from_group=2)
+    
+    Chalk = PlayersGroup(DKOptimizer.player_pool.get_players(), min_from_group=2, max_from_group=3)
+    
+    Leverage = PlayersGroup(DKOptimizer.player_pool.get_players(), min_from_group=2)
+    
+    #DKOptimizer.add_players_group(Chalk)
+    #DKOptimizer.add_players_group(RBPool)
+    #DKOptimizer.add_players_group(Core)
+    #DKOptimizer.add_players_group(Leverage)
+        
+    DKOptimizer.add_stack(PositionsStack(['QB',('TE','WR')]))
+    #DKOptimizer.force_positions_for_opposing_team(('QB','WR'))
+
     ## END RULES
-    list(DKOptimizer.optimize(10))
+    list(DKOptimizer.optimize(150, exposure_strategy=AfterEachExposureStrategy))
     DKOptimizer.export(results_csv_path)
 
 def get_dk_ownership(dk_csv_path, results_csv_path):
@@ -83,7 +110,7 @@ def get_dk_ownership(dk_csv_path, results_csv_path):
                 lookupceiling = dk_csv.loc[dk_csv['Name'] == player, 'Projection Ceil']
                 if not lookupceiling.empty: 
                     totalCeiling += lookupceiling.iloc[0]
-                dk_opto.at[idx, 'Ceiling'] = totalOwn
+                dk_opto.at[idx, 'Ceiling'] = totalCeiling
     # Save the updated DataFrame back to the CSV file
     dk_opto.to_csv(results_csv_path, index=False)
 

@@ -48,7 +48,7 @@ def get_dk_opto(dk_csv_path, results_csv_path):
     DKOptimizer = get_optimizer(Site.DRAFTKINGS, Sport.FOOTBALL)
     DKOptimizer.load_players_from_csv(dk_csv_path)
     ## RULES SECTION
-
+    #High confidence stacks, target ownership 135-145%, min 1 leverage play
     ## END RULES
     list(DKOptimizer.optimize(10))
     DKOptimizer.export(results_csv_path)

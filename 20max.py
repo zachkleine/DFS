@@ -48,7 +48,7 @@ def get_dk_opto(dk_csv_path, results_csv_path):
     DKOptimizer = get_optimizer(Site.DRAFTKINGS, Sport.FOOTBALL)
     DKOptimizer.load_players_from_csv(dk_csv_path)
     DKOptimizer.player_pool.add_filters(
-        PlayerFilter(from_value=3.8)
+        PlayerFilter(from_value=4.2)
     )
     DKOptimizer.set_fantasy_points_strategy(RandomFantasyPointsStrategy(max_deviation=3))
 
@@ -66,23 +66,26 @@ def get_dk_opto(dk_csv_path, results_csv_path):
     ))
 
     ## Player Groups
-    Core = PlayersGroup(DKOptimizer.player_pool.get_players(''), min_from_group=2,max_exposure=0.8)
-    
-    RBPool = PlayersGroup(DKOptimizer.player_pool.get_players(''), min_from_group=2)
-    
-    Chalk = PlayersGroup(DKOptimizer.player_pool.get_players(''), min_from_group=2, max_from_group=3)
-    
-    Leverage = PlayersGroup(DKOptimizer.player_pool.get_players(''), min_from_group=2)
+    Core = PlayersGroup(DKOptimizer.player_pool.get_players(), min_from_group=2,max_exposure=0.8)
+    RBPool = PlayersGroup(DKOptimizer.player_pool.get_players(), min_from_group=2)
+    Chalk = PlayersGroup(DKOptimizer.player_pool.get_players(), min_from_group=2, max_from_group=3)
+    Leverage = PlayersGroup(DKOptimizer.player_pool.get_players(), min_from_group=2)
     
     DKOptimizer.add_players_group(Chalk)
     DKOptimizer.add_players_group(RBPool)
     DKOptimizer.add_players_group(Core)
     DKOptimizer.add_players_group(Leverage)
-    DKOptimizer.add_stack(PositionsStack(['QB','WR',('WR','TE')],for_teams=['']))
-    DKOptimizer.force_positions_for_opposing_team(('QB','WR'))
+    
+    #NOStack = PlayersGroup(DKOptimizer.player_pool.get_players('Derek Carr','Chris Olave','Rashid Shaheed'),
+    #                         max_exposure=0.25,max_from_group=2,min_from_group=2,
+    #                         depends_on=DKOptimizer.player_pool.get_player_by_name('Derek Carr'),strict_depend=False)
+    #DKOptimizer.add_stack(Stack([NOStack]))
+    
+    DKOptimizer.add_stack(PositionsStack(['QB',('WR','TE')],for_teams=[],max_exposure=0.25))
+    #DKOptimizer.force_positions_for_opposing_team(('QB','WR'))
 
     ## END RULES
-    list(DKOptimizer.optimize(50, exposure_strategy=AfterEachExposureStrategy))
+    list(DKOptimizer.optimize(150, max_exposure=0.4, exposure_strategy=AfterEachExposureStrategy))
     DKOptimizer.export(results_csv_path)
 
 def get_dk_ownership(dk_csv_path, results_csv_path):
