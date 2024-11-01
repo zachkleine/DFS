@@ -48,42 +48,48 @@ def get_dk_opto(dk_csv_path, results_csv_path):
     DKOptimizer = get_optimizer(Site.DRAFTKINGS, Sport.FOOTBALL)
     DKOptimizer.load_players_from_csv(dk_csv_path)
     DKOptimizer.player_pool.add_filters(
-        PlayerFilter(from_value=2.7)
+        PlayerFilter(from_value=3.8)
     )
-    DKOptimizer.set_fantasy_points_strategy(RandomFantasyPointsStrategy(max_deviation=3))
+    DKOptimizer.set_fantasy_points_strategy(RandomFantasyPointsStrategy(max_deviation=0.5))
 
     ## RULES SECTION
-
-    #Stacking of some sort, leverage plays
+    ## Base Rules
     DKOptimizer.set_min_salary_cap(49800)
-    #DKOptimizer.restrict_positions_for_opposing_team(['DST'],['QB','RB','WR','TE'])
-    #DKOptimizer.restrict_positions_for_opposing_team(['RB'],['RB'])
+    DKOptimizer.restrict_positions_for_opposing_team(['DST'],['QB','RB','WR','TE'])
+    DKOptimizer.restrict_positions_for_opposing_team(['RB'],['RB'])
+    DKOptimizer.add_stack(PositionsStack(['RB','DST'],max_exposure=0.8))
     #DKOptimizer.restrict_positions_for_same_team(('QB','RB'))
     DKOptimizer.add_players_group(PlayersGroup(
-        players=[player for player in DKOptimizer.players 
-            if player.projected_ownership <= 0.20],
-        min_from_group=2
+        players=[player for player in DKOptimizer.players
+            if player.projected_ownership <= 0.1],
+        min_from_group=3
     ))
 
     ## Player Groups
-    Core = PlayersGroup(DKOptimizer.player_pool.get_players(), min_from_group=2,max_exposure=0.8)
+    Core = PlayersGroup(DKOptimizer.player_pool.get_players(''), min_from_group=1)
+    DKOptimizer.add_players_group(Core)
+
+    RBPool = PlayersGroup(DKOptimizer.player_pool.get_players(''), min_from_group=2)
+    DKOptimizer.add_players_group(RBPool)
     
-    RBPool = PlayersGroup(DKOptimizer.player_pool.get_players(), min_from_group=2)
-    
-    Chalk = PlayersGroup(DKOptimizer.player_pool.get_players(), min_from_group=2, max_from_group=3)
-    
-    Leverage = PlayersGroup(DKOptimizer.player_pool.get_players(), min_from_group=2)
-    
-    #DKOptimizer.add_players_group(Chalk)
-    #DKOptimizer.add_players_group(RBPool)
-    #DKOptimizer.add_players_group(Core)
-    #DKOptimizer.add_players_group(Leverage)
-        
-    DKOptimizer.add_stack(PositionsStack(['QB',('TE','WR')]))
+    Chalk = PlayersGroup(DKOptimizer.player_pool.get_players(''),max_from_group=3)
+    DKOptimizer.add_players_group(Chalk)
+
+    Leverage = PlayersGroup(DKOptimizer.player_pool.get_players(''), max_exposure=0.8,min_from_group=1)    
+    DKOptimizer.add_players_group(Leverage)
+
+    Stack = PlayersGroup(DKOptimizer.player_pool.get_players(''),
+                        max_from_group=3,min_from_group=2,
+                        depends_on=DKOptimizer.player_pool.get_player_by_name(''),strict_depend=False)
+
+    #LimitStackExposure = DKOptimizer.player_pool.get_player_by_name([''])
+    #LimitStackExposure.max_exposure = 0.01
+    DKOptimizer.add_stack(Stack([]))
+    DKOptimizer.add_stack(PositionsStack(['QB',('WR','TE')],for_teams=[],max_exposure=0.2))
     #DKOptimizer.force_positions_for_opposing_team(('QB','WR'))
 
     ## END RULES
-    list(DKOptimizer.optimize(150, exposure_strategy=AfterEachExposureStrategy))
+    list(DKOptimizer.optimize(500,exposure_strategy=AfterEachExposureStrategy))
     DKOptimizer.export(results_csv_path)
 
 def get_dk_ownership(dk_csv_path, results_csv_path):
