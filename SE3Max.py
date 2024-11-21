@@ -58,7 +58,6 @@ def get_dk_opto(dk_csv_path, results_csv_path):
     DKOptimizer.restrict_positions_for_opposing_team(['DST'],['QB','RB','WR','TE'])
     DKOptimizer.restrict_positions_for_opposing_team(['RB'],['RB'])
     DKOptimizer.add_stack(PositionsStack(['RB','DST'],max_exposure=0.8))
-    #DKOptimizer.restrict_positions_for_same_team(('QB','RB'))
     DKOptimizer.add_players_group(PlayersGroup(
         players=[player for player in DKOptimizer.players
             if player.projected_ownership <= 0.1],
