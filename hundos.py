@@ -48,7 +48,7 @@ def get_dk_opto(dk_csv_path, results_csv_path):
     DKOptimizer = get_optimizer(Site.DRAFTKINGS, Sport.FOOTBALL)
     DKOptimizer.load_players_from_csv(dk_csv_path)
     DKOptimizer.player_pool.add_filters(
-        PlayerFilter(from_value=4.7)
+        PlayerFilter(from_value=3.8)
     )
     DKOptimizer.set_fantasy_points_strategy(RandomFantasyPointsStrategy(max_deviation=0.1))
 
@@ -66,46 +66,26 @@ def get_dk_opto(dk_csv_path, results_csv_path):
     ))
 
     ## Player Groups
-    Core = PlayersGroup(DKOptimizer.player_pool.get_players('Christian McCaffrey','Devon Achane','Alvin Kamara'), min_from_group=1)
+    Core = PlayersGroup(DKOptimizer.player_pool.get_players(''), min_from_group=1)
     DKOptimizer.add_players_group(Core)
 
-    RBPool = PlayersGroup(DKOptimizer.player_pool.get_players('Christian McCaffrey','Devon Achane','Alvin Kamara','Rhamondre Stevenson','David Montgomery',
-                                                              'Deandre Swift','Kareem Hunt','Kenneth Walker III','Josh Jacobs','Jahmyr Gibbs','Breece Hall',
-                                                              'Jonathan Taylor','Bijan Robinson','Kyren Williams'), min_from_group=2)
+    RBPool = PlayersGroup(DKOptimizer.player_pool.get_players(''), min_from_group=2)
     DKOptimizer.add_players_group(RBPool)
     
-    Chalk = PlayersGroup(DKOptimizer.player_pool.get_players('Christian McCaffrey','Devon Achane','Alvin Kamara'), min_from_group=1,max_from_group=3)
+    Chalk = PlayersGroup(DKOptimizer.player_pool.get_players(''), min_from_group=2,max_from_group=3)
     DKOptimizer.add_players_group(Chalk)
 
     #Leverage = PlayersGroup(DKOptimizer.player_pool.get_players(), max_exposure=0.8,min_from_group=1)    
     #DKOptimizer.add_players_group(Leverage)
 
-    SFStack = PlayersGroup(DKOptimizer.player_pool.get_players('Brock Purdy','George Kittle','Christian McCaffrey','Deebo Samuel','Jauan Jennings','Ricky Pearsall'),
-                        max_from_group=3,min_from_group=3,
-                        depends_on=DKOptimizer.player_pool.get_player_by_name('Brock Purdy'),strict_depend=False)
-    BUFStack = PlayersGroup(DKOptimizer.player_pool.get_players('Josh Allen','James Cook','Amari Cooper','Khalil Shakir','Dawson Knox'),
-                        max_from_group=3,min_from_group=2,
-                        depends_on=DKOptimizer.player_pool.get_player_by_name('Josh Allen'),strict_depend=False)
-    PITStack = PlayersGroup(DKOptimizer.player_pool.get_players('Russell Wilson','George Pickens'),
+    Stack = PlayersGroup(DKOptimizer.player_pool.get_players(''),
                         max_from_group=2,min_from_group=2,
-                        depends_on=DKOptimizer.player_pool.get_player_by_name('Russell Wilson'),strict_depend=False)
-    NEStack = PlayersGroup(DKOptimizer.player_pool.get_players('Drake Maye','Kayshon Boutte','Hunter Henry','DeMario Douglas'),
-                        max_from_group=2,min_from_group=2,
-                        depends_on=DKOptimizer.player_pool.get_player_by_name('Drake Maye'),strict_depend=False)
-    CLEStack = PlayersGroup(DKOptimizer.player_pool.get_players('Jameis Winston','Cedric Tillman','David Njoku','Jerry Jeudy','Elijah Moore'),
-                        max_from_group=2,min_from_group=2,
-                        depends_on=DKOptimizer.player_pool.get_player_by_name('Jameis Winstons'),strict_depend=False)
-    DETRule = PlayersGroup(DKOptimizer.player_pool.get_players(
-        PlayerFilter(teams=['DET']),
-        PlayerFilter(filter_by='fppg',from_value=10)),
-        min_from_group=1,
-        max_exposure=0.8
-    )
+                        depends_on=DKOptimizer.player_pool.get_player_by_name(''),strict_depend=False)
 
     #LimitStackExposure = DKOptimizer.player_pool.get_player_by_name([''])
     #LimitStackExposure.max_exposure = 0.01
-    DKOptimizer.add_stack(Stack([SFStack,BUFStack,PITStack,NEStack,CLEStack,DETRule]))
-    DKOptimizer.add_stack(PositionsStack(['QB',('WR','TE')],for_teams=['PIT']))
+    DKOptimizer.add_stack(Stack([]))
+    DKOptimizer.add_stack(PositionsStack(['QB',('WR','TE')],for_teams=[]))
     #DKOptimizer.force_positions_for_opposing_team(('QB','WR'))
 
     ## END RULES
