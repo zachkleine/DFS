@@ -50,7 +50,7 @@ def get_dk_opto(dk_csv_path, results_csv_path):
     DKOptimizer.player_pool.add_filters(
         PlayerFilter(from_value=3.8)
     )
-    DKOptimizer.set_fantasy_points_strategy(RandomFantasyPointsStrategy(max_deviation=0.5))
+    DKOptimizer.set_fantasy_points_strategy(RandomFantasyPointsStrategy(max_deviation=0.75))
 
     ## RULES SECTION
     ## Base Rules
