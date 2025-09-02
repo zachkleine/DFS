@@ -11,7 +11,7 @@ if __name__ == '__main__':
     args = parse_args()
     week = args.week
 
-dfs_dir = "G:\\My Drive\\Fantasy Football\\DFS\\2024"
+dfs_dir = "G:\\My Drive\\Fantasy Football\\DFS\\2025"
 dk_csv_path = f"{dfs_dir}\\Week{week}\\DKSalaries.csv"
 etr_csv_path = f"{dfs_dir}\\Week{week}\\DKETRProj.csv"
 results_csv_path = f"{dfs_dir}\\Week{week}\\DKOpto.csv"
@@ -19,26 +19,20 @@ results_csv_path = f"{dfs_dir}\\Week{week}\\DKOpto.csv"
 def get_dk_salaries(dk_csv_path, etr_csv_path):
     dk_csv = pd.read_csv(dk_csv_path)
     etr_csv = pd.read_csv(etr_csv_path)
-    for _, row in dk_csv.iterrows():
+    for idx, row in dk_csv.iterrows():
         name = row['Name']
 
+        # DK Projection -> AvgPointsPerGame
         lookuppts = etr_csv.loc[etr_csv['Player'] == name, 'DK Projection']
-        if not lookuppts.empty:
-            dk_csv.at[_, 'AvgPointsPerGame'] = lookuppts.iloc[0]
-        else: 
-            dk_csv.at[_, 'AvgPointsPerGame'] = 0
+        dk_csv.at[idx, 'AvgPointsPerGame'] = lookuppts.iloc[0] if not lookuppts.empty else 0
         
+        # DK Large Ownership -> Projected Ownership
         lookupown = etr_csv.loc[etr_csv['Player'] == name, 'DK Large Ownership']
-        if not lookupown.empty:
-            dk_csv.at[_, 'Projected Ownership'] = lookupown.iloc[0]
-        else: 
-            dk_csv.at[_, 'Projected Ownership'] = 0
-        
+        dk_csv.at[idx, 'Projected Ownership'] = lookupown.iloc[0] if not lookupown.empty else 0
+
+        # DK Ceiling -> Projection Ceil
         lookupceiling = etr_csv.loc[etr_csv['Player'] == name, 'DK Ceiling']
-        if not lookupceiling.empty:
-            dk_csv.at[_, 'Projection Ceil'] = lookupceiling.iloc[0]
-        else: 
-            dk_csv.at[_, 'Projection Ceil'] = 0
+        dk_csv.at[idx, 'Projection Ceil'] = lookupceiling.iloc[0] if not lookupceiling.empty else 0
 
     dk_csv.to_csv(dk_csv_path, index=False)
 
@@ -58,17 +52,19 @@ def get_dk_ownership(dk_csv_path, results_csv_path):
     dk_csv = pd.read_csv(dk_csv_path)
     dk_opto = pd.read_csv(results_csv_path)
     
-    # Add new columns 'Ownership' and 'Ceiling' with default values (e.g., NaN or 0)
-    dk_opto['Ownership'] = pd.NA  # or you could use 0 or another default value
-    dk_opto['Ceiling'] = pd.NA
+    # Add new columns if not already there
+    if 'Ownership' not in dk_opto.columns:
+        dk_opto['Ownership'] = 0.0
+    if 'Ceiling' not in dk_opto.columns:
+        dk_opto['Ceiling'] = 0.0    
 
     with open(results_csv_path) as file_obj:
         header = next(file_obj)
         reader = csv.reader(file_obj)
         for idx, row in enumerate(reader):
             team = (row[:9])
-            totalOwn = 0
-            totalCeiling = 0
+            totalOwn = 0.0
+            totalCeiling = 0.0
             for player in team:
                 lookupown = dk_csv.loc[dk_csv['Name'] == player, 'Projected Ownership']
                 if not lookupown.empty:
