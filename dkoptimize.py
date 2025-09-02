@@ -1,6 +1,5 @@
 import pandas as pd
 import argparse
-import csv
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Process week parameter.")
@@ -44,7 +43,7 @@ def get_dk_opto(dk_csv_path, results_csv_path):
     ## RULES SECTION
     #DKOptimizer.set_min_salary_cap(49800)
     ## END RULES
-    list(DKOptimizer.optimize(150))
+    list(DKOptimizer.optimize(10))
     DKOptimizer.export(results_csv_path)
 
 def get_dk_ownership(dk_csv_path, results_csv_path):
