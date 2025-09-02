@@ -10,7 +10,7 @@ if __name__ == '__main__':
     args = parse_args()
     week = args.week
 
-dfs_dir = "G:\\My Drive\\Fantasy Football\\DFS\\2024"
+dfs_dir = "G:\\My Drive\\Fantasy Football\\DFS\\_Archive\\2024"
 fd_csv_path = f"{dfs_dir}\\Week{week}\\FDSalaries.csv"
 etr_csv_path = f"{dfs_dir}\\Week{week}\\FDETRProj.csv"
 results_csv_path = f"{dfs_dir}\\Week{week}\\FDOpto.csv"
@@ -18,13 +18,20 @@ results_csv_path = f"{dfs_dir}\\Week{week}\\FDOpto.csv"
 def get_fd_salaries(fd_csv_path, etr_csv_path):
     fd_csv = pd.read_csv(fd_csv_path)
     etr_csv = pd.read_csv(etr_csv_path)
-    for _, row in fd_csv.iterrows():
+
+    cols_to_blank = ["Injury Indicator", "Injury Details"]
+    for col in cols_to_blank:
+        if col in fd_csv.columns:
+            fd_csv[col] = ""
+
+    for idx, row in fd_csv.iterrows():
         name = row['Nickname']
         lookup = etr_csv.loc[etr_csv['Player'] == name, 'FD Projection']
         if not lookup.empty:
-            fd_csv.at[_, 'FPPG'] = lookup.iloc[0]
+            fd_csv.at[idx, 'FPPG'] = lookup.iloc[0]
         else: 
-            fd_csv.at[_, 'FPPG'] = 0
+            fd_csv.at[idx, 'FPPG'] = 0
+
     fd_csv.to_csv(fd_csv_path, index=False)
 
 def get_fd_opto(fd_csv_path, results_csv_path):
@@ -37,7 +44,7 @@ def get_fd_opto(fd_csv_path, results_csv_path):
     #TopPlays = PlayersGroup(FDOptimizer.player_pool.get_players(''),min_from_group=9)
     #FDOptimizer.add_players_group(TopPlays)
     ## END RULES
-    list(FDOptimizer.optimize(50))
+    list(FDOptimizer.optimize(5))
     FDOptimizer.export(results_csv_path)
 
 get_fd_salaries(fd_csv_path, etr_csv_path)

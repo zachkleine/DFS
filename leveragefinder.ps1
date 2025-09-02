@@ -1,7 +1,7 @@
 Param(
     [CmdletBinding()]
     [Parameter(Mandatory=$False)][String]$DfsDir = "G:\My Drive\Fantasy Football\DFS\2024",
-    [Parameter(Mandatory=$False)][int]$Week = "14"
+    [Parameter(Mandatory=$False)][int]$Week = "12"
 )
 function Get-ChalkPlayers {
     Param(
