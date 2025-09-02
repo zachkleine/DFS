@@ -48,33 +48,27 @@ def get_dk_opto(dk_csv_path, results_csv_path):
     DKOptimizer.export(results_csv_path)
 
 def get_dk_ownership(dk_csv_path, results_csv_path):
-    # Read CSV files into DataFrames
     dk_csv = pd.read_csv(dk_csv_path)
     dk_opto = pd.read_csv(results_csv_path)
-    
-    # Add new columns if not already there
-    if 'Ownership' not in dk_opto.columns:
-        dk_opto['Ownership'] = 0.0
-    if 'Ceiling' not in dk_opto.columns:
-        dk_opto['Ceiling'] = 0.0    
 
-    with open(results_csv_path) as file_obj:
-        header = next(file_obj)
-        reader = csv.reader(file_obj)
-        for idx, row in enumerate(reader):
-            team = (row[:9])
-            totalOwn = 0.0
-            totalCeiling = 0.0
-            for player in team:
-                lookupown = dk_csv.loc[dk_csv['Name'] == player, 'Projected Ownership']
-                if not lookupown.empty:
-                    totalOwn += lookupown.iloc[0]
-                dk_opto.at[idx, 'Ownership'] = totalOwn
-                lookupceiling = dk_csv.loc[dk_csv['Name'] == player, 'Projection Ceil']
-                if not lookupceiling.empty: 
-                    totalCeiling += lookupceiling.iloc[0]
-                dk_opto.at[idx, 'Ceiling'] = totalCeiling
-    # Save the updated DataFrame back to the CSV file
+    # Player → (ownership, ceiling) lookup
+    player_lookup = dk_csv.set_index('Name')[['Projected Ownership', 'Projection Ceil']].to_dict('index')
+
+    # Add or reset columns
+    dk_opto['Ownership'] = 0.0
+    dk_opto['Ceiling'] = 0.0
+
+    for idx, row in dk_opto.iterrows():
+        team = row.iloc[:9]  # assumes first 9 columns = players
+        totalOwn = 0.0
+        totalCeil = 0.0
+        for player in team:
+            if player in player_lookup:
+                totalOwn += player_lookup[player]['Projected Ownership']
+                totalCeil += player_lookup[player]['Projection Ceil']
+        dk_opto.at[idx, 'Ownership'] = totalOwn
+        dk_opto.at[idx, 'Ceiling'] = totalCeil
+
     dk_opto.to_csv(results_csv_path, index=False)
 
 get_dk_salaries(dk_csv_path, etr_csv_path)
