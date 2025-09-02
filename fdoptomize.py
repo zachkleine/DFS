@@ -10,7 +10,7 @@ if __name__ == '__main__':
     args = parse_args()
     week = args.week
 
-dfs_dir = "G:\\My Drive\\Fantasy Football\\DFS\\_Archive\\2024"
+dfs_dir = "G:\\My Drive\\Fantasy Football\\DFS\\2025"
 fd_csv_path = f"{dfs_dir}\\Week{week}\\FDSalaries.csv"
 etr_csv_path = f"{dfs_dir}\\Week{week}\\FDETRProj.csv"
 results_csv_path = f"{dfs_dir}\\Week{week}\\FDOpto.csv"
@@ -39,12 +39,12 @@ def get_fd_opto(fd_csv_path, results_csv_path):
     FDOptimizer = get_optimizer(Site.FANDUEL, Sport.FOOTBALL)
     FDOptimizer.load_players_from_csv(fd_csv_path)
     ## RULES SECTION
-    FDOptimizer.set_min_salary_cap(59800)
+    FDOptimizer.set_min_salary_cap(59700)
     #FDOptimizer.player_pool.lock_player('')
     #TopPlays = PlayersGroup(FDOptimizer.player_pool.get_players(''),min_from_group=9)
     #FDOptimizer.add_players_group(TopPlays)
     ## END RULES
-    list(FDOptimizer.optimize(5))
+    list(FDOptimizer.optimize(10))
     FDOptimizer.export(results_csv_path)
 
 get_fd_salaries(fd_csv_path, etr_csv_path)
