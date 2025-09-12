@@ -26,7 +26,7 @@ def get_fd_salaries(fd_csv_path, etr_csv_path):
 
     for idx, row in fd_csv.iterrows():
         name = row['Nickname']
-        lookup = etr_csv.loc[etr_csv['FDName'] == name, 'FD']
+        lookup = etr_csv.loc[etr_csv['FDName'] == name, 'FD Projection']
         if not lookup.empty:
             fd_csv.at[idx, 'FPPG'] = lookup.iloc[0]
         else: 
