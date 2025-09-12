@@ -44,16 +44,8 @@ def get_dk_opto(dk_csv_path, results_csv_path):
     DKOptimizer.load_players_from_csv(dk_csv_path)
     ## RULES SECTION
     DKOptimizer.set_min_salary_cap(49700)
-    DKOptimizer.player_pool.lock_player('David Njoku')
-    DKOptimizer.player_pool.lock_player('Emeka Egbuka')
-    DKOptimizer.player_pool.lock_player('Jonathan Taylor')
-    TopRBs = PlayersGroup(DKOptimizer.player_pool.get_players('James Conner','Devon Achane'),min_from_group=1)
-    DKOptimizer.add_players_group(TopRBs)
-    TopPlays = PlayersGroup(DKOptimizer.player_pool.get_players('Jayden Daniels','Trevor Lawrence',
-                                                                'Jonathan Taylor','James Conner','Devon Achane','Chase Brown','Alvin Kamara',
-                                                                'Emeka Egbuka','Drake London','Jerry Jeudy','Tetairoa McMillan','JaMarr Chase','Brian Thomas Jr.',
-                                                                'David Njoku',
-                                                                'Steelers','Giants'),min_from_group=9)
+    DKOptimizer.player_pool.lock_player('')
+    TopPlays = PlayersGroup(DKOptimizer.player_pool.get_players('',''),min_from_group=9)
     DKOptimizer.add_players_group(TopPlays)
     ## END RULES
     list(DKOptimizer.optimize(num_lineups))
