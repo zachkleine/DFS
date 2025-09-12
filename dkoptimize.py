@@ -3,12 +3,14 @@ import argparse
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Process week parameter.")
-    parser.add_argument('--week', type=str, required=True, help="Enter the week")
+    parser.add_argument('--week', type=int, required=True, help="Enter the week")
+    parser.add_argument('--lineups', type=int, default=10, help="Number of lineups to generate")
     return parser.parse_args()
 
-if __name__ == '__main__': 
+if __name__ == '__main__':
     args = parse_args()
     week = args.week
+    num_lineups = args.lineups
 
 dfs_dir = "G:\\My Drive\\Fantasy Football\\DFS\\2025"
 dk_csv_path = f"{dfs_dir}\\Week{week}\\DKSalaries.csv"
@@ -22,15 +24,15 @@ def get_dk_salaries(dk_csv_path, etr_csv_path):
         name = row['Name']
 
         # DK Projection -> AvgPointsPerGame
-        lookuppts = etr_csv.loc[etr_csv['Player'] == name, 'DK Projection']
+        lookuppts = etr_csv.loc[etr_csv['Name'] == name, 'Projection']
         dk_csv.at[idx, 'AvgPointsPerGame'] = lookuppts.iloc[0] if not lookuppts.empty else 0
         
         # DK Large Ownership -> Projected Ownership
-        lookupown = etr_csv.loc[etr_csv['Player'] == name, 'DK Large Ownership']
+        lookupown = etr_csv.loc[etr_csv['Name'] == name, 'Ownership']
         dk_csv.at[idx, 'Projected Ownership'] = lookupown.iloc[0] if not lookupown.empty else 0
 
         # DK Ceiling -> Projection Ceil
-        lookupceiling = etr_csv.loc[etr_csv['Player'] == name, 'DK Ceiling']
+        lookupceiling = etr_csv.loc[etr_csv['Name'] == name, 'Ceiling']
         dk_csv.at[idx, 'Projection Ceil'] = lookupceiling.iloc[0] if not lookupceiling.empty else 0
 
     dk_csv.to_csv(dk_csv_path, index=False)
@@ -41,9 +43,20 @@ def get_dk_opto(dk_csv_path, results_csv_path):
     DKOptimizer = get_optimizer(Site.DRAFTKINGS, Sport.FOOTBALL)
     DKOptimizer.load_players_from_csv(dk_csv_path)
     ## RULES SECTION
-    #DKOptimizer.set_min_salary_cap(49800)
+    DKOptimizer.set_min_salary_cap(49700)
+    DKOptimizer.player_pool.lock_player('David Njoku')
+    DKOptimizer.player_pool.lock_player('Emeka Egbuka')
+    DKOptimizer.player_pool.lock_player('Jonathan Taylor')
+    TopRBs = PlayersGroup(DKOptimizer.player_pool.get_players('James Conner','Devon Achane'),min_from_group=1)
+    DKOptimizer.add_players_group(TopRBs)
+    TopPlays = PlayersGroup(DKOptimizer.player_pool.get_players('Jayden Daniels','Trevor Lawrence',
+                                                                'Jonathan Taylor','James Conner','Devon Achane','Chase Brown','Alvin Kamara',
+                                                                'Emeka Egbuka','Drake London','Jerry Jeudy','Tetairoa McMillan','JaMarr Chase','Brian Thomas Jr.',
+                                                                'David Njoku',
+                                                                'Steelers','Giants'),min_from_group=9)
+    DKOptimizer.add_players_group(TopPlays)
     ## END RULES
-    list(DKOptimizer.optimize(10))
+    list(DKOptimizer.optimize(num_lineups))
     DKOptimizer.export(results_csv_path)
 
 def get_dk_ownership(dk_csv_path, results_csv_path):
