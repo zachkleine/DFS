@@ -45,11 +45,7 @@ def get_dk_opto(dk_csv_path, results_csv_path):
     ## RULES SECTION
     DKOptimizer.set_min_salary_cap(49700)
     #DKOptimizer.player_pool.lock_player('')
-    TopPlays = PlayersGroup(DKOptimizer.player_pool.get_players('Trevor Lawrence','Drake Maye',
-                                                                'Rachaad White','Rico Dowdle','Javonte Williams','Christian McCaffrey','Josh Jacobs','Ashton Jeanty',
-                                                                'Puka Nacua','Jaxon Smith-Njigba','Chris Olave','Stefon Diggs','Emeka Egbuka','Tetairoa McMillan','Jaylen Waddle','Tez Johnson',
-                                                                'Michael Mayer','Hunter Long','Trey McBride','Tucker Kraft',
-                                                                'Browns','Titans','Dolphins','Raiders'),min_from_group=9)
+    TopPlays = PlayersGroup(DKOptimizer.player_pool.get_players(''),min_from_group=9)
     DKOptimizer.add_players_group(TopPlays)
     ## END RULES
     list(DKOptimizer.optimize(num_lineups))
