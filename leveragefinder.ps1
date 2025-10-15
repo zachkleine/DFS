@@ -10,15 +10,15 @@ function Get-ChalkPlayers {
     )
     $ChalkMin = @{
         "QB"  = "10"
-        "RB"  = "15"
-        "WR"  = "15"
-        "TE"  = "12"
-        "DST" = "10"
+        "RB"  = "25"
+        "WR"  = "20"
+        "TE"  = "15"
+        "DST" = "15"
     }
     $Chalk = @()
     foreach ($player in $Projections) {
-        $position = $player.'Position'
-        $ownership = [double]$player.'Ownership'
+        $position = $player.'DK Pos'
+        $ownership = [double]$player.'Large Field'
         if ($ChalkMin.ContainsKey($position) -and $ownership -ge $ChalkMin[$position]) {
             $Chalk += $player
         }
@@ -39,15 +39,15 @@ function Get-TeamLeverage {
     }
     $TeamLeverage = @()
     foreach ($chalkPlayer in $Chalk) {
-        $excludedPositions = $ExclusionRules[$chalkPlayer.'Position']         
+        $excludedPositions = $ExclusionRules[$chalkPlayer.'DK Pos']         
         $TeamPlayers = $Projections | Where-Object {
             $_.Team -eq $chalkPlayer.Team `
-            -and [double]$_.'Projection' -gt 10 `
-            -and [double]$_.'Ownership' -le 10 `
-            -and [double]$_.'Value' -ge -5.0 `
-            -and ($excludedPositions -notcontains $_.'Position')
+            -and [double]$_.'DK Proj' -gt 10 `
+            -and [double]$_.'Large Field' -le 10 `
+            -and [double]$_.'DK Value' -ge -5.0 `
+            -and ($excludedPositions -notcontains $_.'DK Pos')
         }
-        $TeamPlayers | Add-Member -MemberType NoteProperty -Name "Team Leverage" -Value $chalkPlayer.Name -Force
+        $TeamPlayers | Add-Member -MemberType NoteProperty -Name "Team Leverage" -Value $chalkPlayer.Player -Force
         $TeamLeverage += $TeamPlayers
         
     }
@@ -62,15 +62,15 @@ function Get-PricePivots {
     $PricePivots = @()
     foreach ($chalkPlayer in $Chalk) {
         $Pivots = $Projections | Where-Object {
-            $_.'Position' -notin @('DST','QB') `
-            -and $_.'Position' -eq $chalkPlayer.'Position' `
-            -and [double]$_.'Salary' -ge ([double]$chalkPlayer.'Salary' - 300) `
-            -and [double]$_.'Salary' -le ([double]$chalkPlayer.'Salary' + 300) `
-            -and [double]$_.'Ownership' -le 10 `
-            -and [double]$_.'Value' -ge -5.0 `
-            -and [double]$_.'Projection' -gt 10
+            $_.'DK Pos' -notin @('DST','QB') `
+            -and $_.'DK Pos' -eq $chalkPlayer.'DK Pos' `
+            -and [double]$_.'DK Salary' -ge ([double]$chalkPlayer.'DK Salary' - 300) `
+            -and [double]$_.'DK Salary' -le ([double]$chalkPlayer.'DK Salary' + 300) `
+            -and [double]$_.'Large Field' -le 10 `
+            -and [double]$_.'DK Value' -ge -5.0 `
+            -and [double]$_.'DK Proj' -gt 10
         }
-        $Pivots | Add-Member -MemberType NoteProperty -Name "Price Pivots" -Value $chalkPlayer.Name -Force
+        $Pivots | Add-Member -MemberType NoteProperty -Name "Price Pivots" -Value $chalkPlayer.Player -Force
         $PricePivots += $Pivots
     }
     return $PricePivots
@@ -78,10 +78,10 @@ function Get-PricePivots {
 
 $FullDir = Join-Path -Path $DfsDir -ChildPath "week$Week\DKETRProj.csv"
 $Projections = Import-Csv -Path $FullDir `
-            | Select-Object -Property 'Name','Team','Position','Salary','Projection','Ownership','Value'
+            | Select-Object -Property 'Player','Team','DK Pos','DK Salary','DK Proj','Large Field','DK Value'
 $Chalk = Get-ChalkPlayers -Projections $Projections
 $TeamLeverage = Get-TeamLeverage -Projections $Projections -Chalk $Chalk
 $PricePivots = Get-PricePivots -Projections $Projections -Chalk $Chalk
 $LeveragePlays = $PricePivots + $TeamLeverage
-$LeveragePlays | Select-Object -Property Name,Team, "Position", "Salary", "Projection", "Ownership", "Value", "Price Pivots", "Team Leverage" -Unique `
+$LeveragePlays | Select-Object -Property 'Player','Team', "DK Pos", "DK Salary", "DK Proj", "Large Field", "DK Value", "Price Pivots", "Team Leverage" -Unique `
                | Sort-Object Player | Format-Table -AutoSize

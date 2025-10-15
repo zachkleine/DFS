@@ -26,7 +26,7 @@ def get_fd_salaries(fd_csv_path, etr_csv_path):
 
     for idx, row in fd_csv.iterrows():
         name = row['Nickname']
-        lookup = etr_csv.loc[etr_csv['FDName'] == name, 'FD Projection']
+        lookup = etr_csv.loc[etr_csv['Player'] == name, 'FD Proj']
         if not lookup.empty:
             fd_csv.at[idx, 'FPPG'] = lookup.iloc[0]
         else: 
@@ -40,11 +40,16 @@ def get_fd_opto(fd_csv_path, results_csv_path):
     FDOptimizer.load_players_from_csv(fd_csv_path)
     ## RULES SECTION
     FDOptimizer.set_min_salary_cap(59700)
-    FDOptimizer.player_pool.lock_player('')
-    TopPlays = PlayersGroup(FDOptimizer.player_pool.get_players('',''),min_from_group=9)
+    FDOptimizer.player_pool.lock_player('Rachaad White')
+    FDOptimizer.player_pool.lock_player('Rico Dowdle')
+    TopPlays = PlayersGroup(FDOptimizer.player_pool.get_players('Trevor Lawrence','Drake Maye',
+                                                                'Rico Dowdle','Rachaad White','Christian McCaffrey','Javonte Williams','Josh Jacobs','DeVon Achane',
+                                                                'Stefon Diggs','Chris Olave','Puka Nacua','Emeka Egbuka','Tetairoa McMillan','George Pickens','Jaxon Smith-Njigba','Jaylen Waddle',
+                                                                'Trey McBride','Michael Mayer','Tyler Warren','Jake Ferguson',
+                                                                'Raiders','Packers','Browns','Dolphins'),min_from_group=9)
     FDOptimizer.add_players_group(TopPlays)
     ## END RULES
-    list(FDOptimizer.optimize(25))
+    list(FDOptimizer.optimize(10))
     FDOptimizer.export(results_csv_path)
 
 get_fd_salaries(fd_csv_path, etr_csv_path)

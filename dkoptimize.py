@@ -24,15 +24,15 @@ def get_dk_salaries(dk_csv_path, etr_csv_path):
         name = row['Name']
 
         # DK Projection -> AvgPointsPerGame
-        lookuppts = etr_csv.loc[etr_csv['Name'] == name, 'Projection']
+        lookuppts = etr_csv.loc[etr_csv['Player'] == name, 'DK Proj']
         dk_csv.at[idx, 'AvgPointsPerGame'] = lookuppts.iloc[0] if not lookuppts.empty else 0
         
         # DK Large Ownership -> Projected Ownership
-        lookupown = etr_csv.loc[etr_csv['Name'] == name, 'Ownership']
+        lookupown = etr_csv.loc[etr_csv['Player'] == name, 'Large Field']
         dk_csv.at[idx, 'Projected Ownership'] = lookupown.iloc[0] if not lookupown.empty else 0
 
         # DK Ceiling -> Projection Ceil
-        lookupceiling = etr_csv.loc[etr_csv['Name'] == name, 'Ceiling']
+        lookupceiling = etr_csv.loc[etr_csv['Player'] == name, 'DK Ceiling']
         dk_csv.at[idx, 'Projection Ceil'] = lookupceiling.iloc[0] if not lookupceiling.empty else 0
 
     dk_csv.to_csv(dk_csv_path, index=False)
@@ -44,8 +44,12 @@ def get_dk_opto(dk_csv_path, results_csv_path):
     DKOptimizer.load_players_from_csv(dk_csv_path)
     ## RULES SECTION
     DKOptimizer.set_min_salary_cap(49700)
-    DKOptimizer.player_pool.lock_player('')
-    TopPlays = PlayersGroup(DKOptimizer.player_pool.get_players('',''),min_from_group=9)
+    #DKOptimizer.player_pool.lock_player('')
+    TopPlays = PlayersGroup(DKOptimizer.player_pool.get_players('Trevor Lawrence','Drake Maye',
+                                                                'Rachaad White','Rico Dowdle','Javonte Williams','Christian McCaffrey','Josh Jacobs','Ashton Jeanty',
+                                                                'Puka Nacua','Jaxon Smith-Njigba','Chris Olave','Stefon Diggs','Emeka Egbuka','Tetairoa McMillan','Jaylen Waddle','Tez Johnson',
+                                                                'Michael Mayer','Hunter Long','Trey McBride','Tucker Kraft',
+                                                                'Browns','Titans','Dolphins','Raiders'),min_from_group=9)
     DKOptimizer.add_players_group(TopPlays)
     ## END RULES
     list(DKOptimizer.optimize(num_lineups))
