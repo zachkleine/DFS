@@ -31,20 +31,17 @@ def extract_usernames(dfs_dir):
     with open(file_path, "r", encoding="utf-8") as f:
         text = f.read()
 
-    # Remove all x<number> tokens (e.g., x13, x49)
+    # Remove x<number> and Play
     text = re.sub(r'x\d+', '', text)
-    # Remove all 'Play' tokens
     text = text.replace('Play', ' ')
-    # Collapse any whitespace runs into a single space
     text = re.sub(r'\s+', ' ', text).strip()
-    # Split by space to get usernames
     usernames = text.split(' ') if text else []
 
     # Deduplicate while preserving order
     seen = set()
     clean_usernames = []
     for u in usernames:
-        if u not in seen:
+        if u not in seen and u:
             seen.add(u)
             clean_usernames.append(u)
 
@@ -64,18 +61,14 @@ def split_lineup(lineup_str):
     for token in tokens:
         if token.upper() in positions:
             if current_pos and current_name:
-                player_name = " ".join(current_name).strip()
-                players.append((current_pos.upper(), player_name))
+                players.append((current_pos.upper(), " ".join(current_name).strip()))
             current_pos = token.upper()
             current_name = []
         else:
             current_name.append(token)
 
     if current_pos and current_name:
-        player_name = " ".join(current_name).strip()
-        if player_name.upper().endswith("DST"):
-            player_name = player_name.rstrip()
-        players.append((current_pos.upper(), player_name))
+        players.append((current_pos.upper(), " ".join(current_name).strip()))
 
     return players
 
@@ -125,7 +118,7 @@ def get_points_and_lineup_from_previous_week(dfs_dir, usernames, prev_week):
                                         results.append({
                                             "username": row["EntryName"],
                                             "points": row.get("Points", None),
-                                            "lineup": split_lineup(row.get("Lineup", ""))
+                                            "lineup": split_lineup(row.get("Lineup", "")),
                                         })
             except Exception as e:
                 print(f"Error reading {file}: {e}")
@@ -140,14 +133,14 @@ def get_points_and_lineup_from_previous_week(dfs_dir, usernames, prev_week):
             seen.add(key)
     return unique_results
 
-def calculate_projected_total(results, prev_week):
+def calculate_projected_total(results, prev_week, dfs_dir):
     """Add projected points from DKETRProj.csv (column 'DK Proj') in previous week folder."""
     prev_week_dir = os.path.join(os.path.dirname(dfs_dir), f"Week{prev_week}")
     proj_file = os.path.join(prev_week_dir, "DKETRProj.csv")
     
     if not os.path.exists(proj_file):
         print(f"⚠️ Projection file not found: {proj_file}")
-        return []
+        return [], []
 
     proj_df = pd.read_csv(proj_file)
     proj_df["Player"] = proj_df["Player"].apply(normalize_name)
@@ -172,6 +165,7 @@ def calculate_projected_total(results, prev_week):
 
         enhanced_results.append({
             "username": r["username"],
+            "points": r.get("points", None),
             "lineup": lineup_proj,
             "total_proj": total_proj
         })
@@ -191,7 +185,7 @@ if __name__ == '__main__':
     matched_usernames = {r["username"] for r in results}
     unmatched_usernames = [u for u in usernames if u not in matched_usernames]
 
-    final_results, missing_players = calculate_projected_total(results, prev_week)
+    final_results, missing_players = calculate_projected_total(results, prev_week, dfs_dir)
 
     if final_results:
         csv_data = []
@@ -199,7 +193,8 @@ if __name__ == '__main__':
             lineup_names = [p["player"] for p in r['lineup']]
             csv_data.append({
                 "username": r['username'],
-                "total_proj": r['total_proj'],
+                "actual_points": r.get('points', None),
+                "total_proj": round(r['total_proj'], 2),
                 "lineup": ", ".join(lineup_names)
             })
 
@@ -209,7 +204,7 @@ if __name__ == '__main__':
         output_csv = os.path.join(dfs_dir, f"Week{week}_Lineups_Projected.csv")
 
         with open(output_csv, mode='w', newline='', encoding='utf-8') as f:
-            writer = csv.DictWriter(f, fieldnames=["username", "total_proj", "lineup"])
+            writer = csv.DictWriter(f, fieldnames=["username", "actual_points", "total_proj", "lineup"])
             writer.writeheader()
             writer.writerows(csv_data)
 
