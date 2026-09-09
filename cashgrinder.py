@@ -175,12 +175,12 @@ def calculate_projected_total(results, prev_week, dfs_dir):
 if __name__ == '__main__':
     args = parse_args()
     week = args.week
-    dfs_dir = f"G:\\My Drive\\Fantasy Football\\DFS\\2025\\Week{week}"
-
+    dfs_dir = f"G:\\My Drive\\Fantasy Football\\DFS\\2026\\Week{week}"
     usernames = extract_usernames(dfs_dir)
     print(f"✅ Extracted {len(usernames)} usernames from Week{week}.")
 
     prev_week = week - 1
+
     results = get_points_and_lineup_from_previous_week(dfs_dir, usernames, prev_week)
     matched_usernames = {r["username"] for r in results}
     unmatched_usernames = [u for u in usernames if u not in matched_usernames]

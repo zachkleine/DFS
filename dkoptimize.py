@@ -12,7 +12,7 @@ if __name__ == '__main__':
     week = args.week
     num_lineups = args.lineups
 
-dfs_dir = "G:\\My Drive\\Fantasy Football\\DFS\\2025"
+dfs_dir = "G:\\My Drive\\Fantasy Football\\DFS\\2026"
 dk_csv_path = f"{dfs_dir}\\Week{week}\\DKSalaries.csv"
 etr_csv_path = f"{dfs_dir}\\Week{week}\\DKETRProj.csv"
 results_csv_path = f"{dfs_dir}\\Week{week}\\DKOpto.csv"
@@ -46,6 +46,7 @@ def get_dk_opto(dk_csv_path, results_csv_path):
     DKOptimizer.set_min_salary_cap(49700)
     #DKOptimizer.player_pool.lock_player('')
     TopPlays = PlayersGroup(DKOptimizer.player_pool.get_players(''),min_from_group=9)
+
     DKOptimizer.add_players_group(TopPlays)
     ## END RULES
     list(DKOptimizer.optimize(num_lineups))
@@ -68,7 +69,7 @@ def get_dk_ownership(dk_csv_path, results_csv_path):
         totalCeil = 0.0
         for player in team:
             if player in player_lookup:
-                totalOwn += player_lookup[player]['Projected Ownership']
+                totalOwn += float(str(player_lookup[player]['Projected Ownership']).replace('%', '').strip() or 0)
                 totalCeil += player_lookup[player]['Projection Ceil']
         dk_opto.at[idx, 'Ownership'] = totalOwn
         dk_opto.at[idx, 'Ceiling'] = totalCeil

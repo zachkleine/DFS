@@ -12,7 +12,7 @@ if __name__ == '__main__':
     week = args.week
     num_lineups = args.lineups
 
-dfs_dir = "G:\\My Drive\\Fantasy Football\\DFS\\2025"
+dfs_dir = "G:\\My Drive\\Fantasy Football\\DFS\\2026"
 dk_csv_path = f"{dfs_dir}\\Week{week}\\DKSalaries.csv"
 etr_csv_path = f"{dfs_dir}\\Week{week}\\DKETRProj.csv"
 results_csv_path = f"{dfs_dir}\\Week{week}\\DKGPP.csv"
